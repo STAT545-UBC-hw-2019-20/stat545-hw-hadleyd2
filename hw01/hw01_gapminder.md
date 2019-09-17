@@ -3,15 +3,19 @@ Exploration of gapminder
 Dan Hadley
 9/17/2019
 
-Introduction
-------------
+-   [1. Introduction](#introduction)
+-   [2. Overview](#overview)
+-   [3. Analysis](#analysis)
+
+1. Introduction
+---------------
 
 We explore the gapminder dataset available in the gapminder package. All analyses are performed using three R packages: [gapminder](https://cran.r-project.org/web/packages/gapminder/index.html), [tibble](https://cran.r-project.org/web/packages/tibble/index.html), [DT](https://cran.r-project.org/web/packages/DT/index.html).
 
 The first code chunk, excluded from the document, loads these packages using the `library` command.
 
-Overview
---------
+2. Overview
+-----------
 
 To get a feel for the gapminder dataset, we can view the first 6 rows using the `head()` function.
 
@@ -31,8 +35,8 @@ head(gapminder)
 
 We see that this function produces a 6 row and 6 column object called a tibble. The dataset contains information on the life expectancy (in years), population, and GPD per capita (US$, inflation-adjusted) for 142 countries from 1952 to 2007 measured every 5 years.
 
-Analysis
---------
+3. Analysis
+-----------
 
 To get a feel for the dataset, the `summary()` function calclulates the minimum, 3rd quartile, median, mean, 1st quartile, and maximum value for all numeric columns. Columns with character data, often saved as the factor data type in `R`, performs counts on the unique character entries.
 
@@ -80,7 +84,7 @@ text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
      labels=dat$country[which.min(dat$lifeExp)], cex=0.75)
 ```
 
-![](hw01_gapminder_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](hw01_gapminder_files/figure-markdown_github/gpd-vs-lifeExp-1.png)
 
 We see from the plot that Japan had the highest life expectancy in 2007 at 82.6 years and Norway had the highest GDP per capita in 2007 at US$49357.19. Meanwhile, Swaziland had the lowest life expectancy in 2007 at 39.6 years. The result is a data set with 1704 observations.
 
@@ -96,4 +100,4 @@ plot(can$gdpPercap, can$lifeExp, type='n',
 text(can$gdpPercap, can$lifeExp, labels=can$year, cex=0.8)
 ```
 
-![Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada every five years from 1952 to 2007](hw01_gapminder_files/figure-markdown_github/plot-1.png)
+![Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada every five years from 1952 to 2007](hw01_gapminder_files/figure-markdown_github/Canada-1.png)
