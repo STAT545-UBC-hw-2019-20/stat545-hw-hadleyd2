@@ -28,7 +28,7 @@ library(knitr)
 
 - The complete `gapminder` data set has `r nrow(gapminder)` observations.
 
-## 2. Analysis
+## 2. Summary
 
 ```{r summ, echo=FALSE, results=FALSE}
 (summ.gap <- summary(gapminder)) #Surrounding with () declares variable and prints value(s)
@@ -44,7 +44,7 @@ cnt <- aggregate(gapminder, by=list(gapminder$continent), length) #counts observ
 
 - GDP per capita data has a large positive skew.
 
-## 3 Life Expectancy by Continent
+## 3. Life Expectancy by Continent
 
 Life expectancies of Asian countries have steadily increased
 
@@ -64,7 +64,7 @@ par(mfrow=c(1,1))
 ```
 
 
-## 4 Life Expectancy and GDP per Capita in 2007
+## 4. Life Expectancy and GDP per Capita in 2007
 
 - Longest life expectancy: Japan (`r round(max(dat$lifeExp), 1)` years)
 - Highest GDP per capita: Norway (US\$`r format(max(dat$gdpPercap), scientific=FALSE)`)
@@ -93,7 +93,7 @@ text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
 
 ```
 
-## 5 Life Expectancy and GDP per Capita for Canada
+## 5. Life Expectancy and GDP per Capita for Canada
 
 - Life expectancy and GDP per capita for Canada have both increased over time
 - The relationship has been approximately linear
