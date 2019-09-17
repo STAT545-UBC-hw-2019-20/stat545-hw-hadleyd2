@@ -3,9 +3,7 @@ title: "Exploration of Gapminder"
 author: "Dan Hadley"
 date: "9/17/2019"
 output: 
-  md_document:
-    variant: markdown_github
-    toc: true
+  github_document
 ---
 
 ```{r setup, include=FALSE, echo=FALSE, warning=FALSE}
@@ -21,13 +19,13 @@ library(tibble)
 library(DT)
 ```
 
-## Introduction
+## 1. Introduction
 
 We explore the gapminder dataset available in the gapminder package.  All analyses are performed using three R packages: [gapminder](https://cran.r-project.org/web/packages/gapminder/index.html), [tibble](https://cran.r-project.org/web/packages/tibble/index.html), [DT](https://cran.r-project.org/web/packages/DT/index.html).
 
 In the first code chunk, excluded from the document, we set the file path for the plots rendered by R Markdown and load the above packages and `knitr` using the `library` command.
 
-## Overview
+## 2. Overview
 
 To start, we can view the columns in the dataset using `R`'s `names()` function.
 ```{r colnames, echo=FALSE}
@@ -49,7 +47,7 @@ head(gapminder)
 
 We see that this function produces a 6 row and 6 column object called a tibble.  The dataset contains information on the life expectancy (in years), population, and GPD per capita (US\$, inflation-adjusted) for `r length(unique(gapminder$country))` countries from `r min(gapminder$year)` to `r max(gapminder$year)` measured every 5 years.
 
-## Analysis
+## 3. Analysis
 
 To get a feel for the dataset, the `summary()` function calclulates the minimum, 3rd quartile, median, mean, 1st quartile, and maximum value for all numeric columns.  Columns with character data, often saved as the factor data type in `R`, performs counts on the unique character entries.
 ```{r summ, echo=FALSE}
@@ -60,11 +58,11 @@ cnt <- aggregate(gapminder, by=list(gapminder$continent), length) #counts observ
 
 We see that Africa is the most represented continent with `r max(cnt$continent)` observations, which has `r diff(sort(cnt$continent)[1:2])` more observations than the next most represented continent, `r cnt$Group.1[which(rank(-cnt$continent) == 2)]`.  For numerical data, `summary()` presents a quick snapshot of its distribution.  For example, we see that GDP per capita ranges from `r min(cnt$gdpPercap)` years to `r max(cnt$gdpPercap)` and the mean (`r mean(gapminder$gpdPercap)`) is twice as large as the median (`r median(gapminder$gpdPercap)`).  Thus, the GPD per capita data has a large positive skew.
 
-### 2007 Life Expectancy and GPD per Capita
+### 3.1 Life Expectancy and GPD per Capita in 2007
 
 Suppose we are interested in the relationship between Life Expectancy and GDP per capita.  We plot life expectancy against GDP per capita for all `r nrow(gapminder[gapminder$year == max(gapminder$year),])` countries where the most recent year's data, `r max(gapminder$year)`, is available.
 
-```{r gpd-vs-lifeExp}
+```{r gpd-vs-lifeExp, echo=FALSE}
 dat <- gapminder[gapminder$year == max(gapminder$year), c(1, 4, 6)]
 
 plot(dat$gdpPercap, dat$lifeExp, pch=16, cex=0.5,
@@ -82,11 +80,11 @@ text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
 
 We see from the plot that Japan had the highest life expectancy in 2007 at `r round(max(dat$lifeExp), 1)` years and Norway had the highest GDP per capita in 2007 at US\$`r format(max(dat$gdpPercap), scientific=FALSE)`.  Meanwhile, Swaziland had the lowest life expectancy in 2007 at `r round(min(dat$lifeExp), 1)` years.  The result is a data set with `r nrow(gapminder)` observations.
 
-### Canada Life Expectancy and GPD per Capita
+### 3.2 Life Expectancy and GPD per Capita for Canada
 
 If we are interested in Canada specifically, we can limit our analysis to just one country.  Suppose we want to plot life expectancy against GDP per capita for Canada from `r min(gapminder$year)` to `r max(gapminder$year)`. In order to add the third dimension of time, the plot symbols are the years of the observations.
 
-```{r Canada, warning=FALSE, fig.cap="Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada every five years from 1952 to 2007"}
+```{r Canada, echo=FALSE, warning=FALSE, fig.cap="Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada every five years from 1952 to 2007"}
 can <- gapminder[gapminder$country=='Canada',] #Subset gapminder dataset to Canada's observations
 
 # Plot with year as plot symbol

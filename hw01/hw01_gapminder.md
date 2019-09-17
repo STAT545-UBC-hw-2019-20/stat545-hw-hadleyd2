@@ -1,13 +1,9 @@
--   [Introduction](#introduction)
--   [Overview](#overview)
--   [Analysis](#analysis)
-    -   [2007 Life Expectancy and GPD per
-        Capita](#life-expectancy-and-gpd-per-capita)
-    -   [Canada Life Expectancy and GPD per
-        Capita](#canada-life-expectancy-and-gpd-per-capita)
+Exploration of Gapminder
+================
+Dan Hadley
+9/17/2019
 
-Introduction
-------------
+## 1\. Introduction
 
 We explore the gapminder dataset available in the gapminder package. All
 analyses are performed using three R packages:
@@ -19,8 +15,7 @@ In the first code chunk, excluded from the document, we set the file
 path for the plots rendered by R Markdown and load the above packages
 and `knitr` using the `library` command.
 
-Overview
---------
+## 2\. Overview
 
 To start, we can view the columns in the dataset using `R`’s `names()`
 function.
@@ -66,8 +61,7 @@ tibble. The dataset contains information on the life expectancy (in
 years), population, and GPD per capita (US$, inflation-adjusted) for 142
 countries from 1952 to 2007 measured every 5 years.
 
-Analysis
---------
+## 3\. Analysis
 
 To get a feel for the dataset, the `summary()` function calclulates the
 minimum, 3rd quartile, median, mean, 1st quartile, and maximum value for
@@ -100,50 +94,25 @@ capita ranges from 24 years to 624 and the mean (NA) is twice as large
 as the median (). Thus, the GPD per capita data has a large positive
 skew.
 
-### 2007 Life Expectancy and GPD per Capita
+### 3.1 Life Expectancy and GPD per Capita in 2007
 
 Suppose we are interested in the relationship between Life Expectancy
 and GDP per capita. We plot life expectancy against GDP per capita for
 all 142 countries where the most recent year’s data, 2007, is available.
 
-``` r
-dat <- gapminder[gapminder$year == max(gapminder$year), c(1, 4, 6)]
-
-plot(dat$gdpPercap, dat$lifeExp, pch=16, cex=0.5,
-     xlab="GPD per Capita", ylab="Life Expectancy",
-     main='Plot of 2007 Life Expectancy against 2007 GPD per Capita',
-     ylim=c(30, 90))
-text(x=dat$gdpPercap[which.max(dat$lifeExp)], y=max(dat$lifeExp)+2,
-     labels=dat$country[which.max(dat$lifeExp)], cex=0.75)
-text(x=max(dat$gdpPercap), y=dat$lifeExp[which.max(dat$gdpPercap)]+2,
-     labels=dat$country[which.max(dat$gdpPercap)], cex=0.75)
-text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
-     labels=dat$country[which.min(dat$lifeExp)], cex=0.75)
-```
-
-![](hw01_gapminder_files/gpd-vs-lifeExp-1.png)
+![](hw01_gapminder_files/gpd-vs-lifeExp-1.png)<!-- -->
 
 We see from the plot that Japan had the highest life expectancy in 2007
 at 82.6 years and Norway had the highest GDP per capita in 2007 at
 US$49357.19. Meanwhile, Swaziland had the lowest life expectancy in 2007
 at 39.6 years. The result is a data set with 1704 observations.
 
-### Canada Life Expectancy and GPD per Capita
+### 3.2 Life Expectancy and GPD per Capita for Canada
 
 If we are interested in Canada specifically, we can limit our analysis
 to just one country. Suppose we want to plot life expectancy against GDP
 per capita for Canada from 1952 to 2007. In order to add the third
 dimension of time, the plot symbols are the years of the observations.
-
-``` r
-can <- gapminder[gapminder$country=='Canada',] #Subset gapminder dataset to Canada's observations
-
-# Plot with year as plot symbol
-plot(can$gdpPercap, can$lifeExp, type='n',
-     xlab="GPD per Capita", ylab="Life Expectancy",
-     main="Data for Canada from 1952 thru 2007")
-text(can$gdpPercap, can$lifeExp, labels=can$year, cex=0.8)
-```
 
 ![Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada
 every five years from 1952 to 2007](hw01_gapminder_files/Canada-1.png)
