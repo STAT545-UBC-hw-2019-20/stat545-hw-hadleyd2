@@ -94,6 +94,13 @@ plot(dat$gdpPercap, dat$lifeExp, pch=16, cex=0.5,
      xlab="GDP per Capita", ylab="Life Expectancy",
      main='Plot of 2007 Life Expectancy against 2007 GDP per Capita',
      ylim=c(30, 90))
+points(x=c(dat$gdpPercap[which.max(dat$lifeExp)], 
+           max(dat$gdpPercap),
+           dat$gdpPercap[which.min(dat$lifeExp)]),
+       y=c(max(dat$lifeExp),
+           dat$lifeExp[which.max(dat$gdpPercap)],
+           min(dat$lifeExp)),
+       pch=16, cex=0.75, col='red')
 text(x=dat$gdpPercap[which.max(dat$lifeExp)], y=max(dat$lifeExp)+2,
      labels=dat$country[which.max(dat$lifeExp)], cex=0.75)
 text(x=max(dat$gdpPercap), y=dat$lifeExp[which.max(dat$gdpPercap)]+2,

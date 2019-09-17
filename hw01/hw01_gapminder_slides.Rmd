@@ -1,0 +1,109 @@
+---
+title: "Gapminder Exploration"
+author: "Dan Hadley"
+date: "9/17/2019"
+output: 
+  beamer_presentation: default
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE, echo=FALSE, warning=FALSE}
+# Set path to save images
+knitr::opts_chunk$set(
+  fig.path = "hw01_gapminder_files/")
+```
+```{r load, warning=FALSE, echo=FALSE}
+# Load libraries
+library(gapminder)
+library(tibble)
+library(DT)
+library(knitr)
+```
+
+## 1. Overview
+
+- The `gapminder` dataset contains life expectancy, population, and GDP per capita data for `r length(unique(gapminder$country))` countries
+
+- Data was collected every 5 years from `r min(gapminder$year)` to `r max(gapminder$year)`
+
+- The complete `gapminder` data set has `r nrow(gapminder)` observations.
+
+## 2. Analysis
+
+```{r summ, echo=FALSE, results=FALSE}
+(summ.gap <- summary(gapminder)) #Surrounding with () declares variable and prints value(s)
+
+cnt <- aggregate(gapminder, by=list(gapminder$continent), length) #counts observations by continent
+```
+
+- Africa has `r max(cnt$continent)` observations, `r diff(sort(cnt$continent)[1:2])` more than the next continent, `r cnt$Group.1[which(rank(-cnt$continent) == 2)]`
+
+- Across all countries, GDP per capita ranges from `r min(cnt$gdpPercap)` USD to `r max(cnt$gdpPercap)` USD
+
+- The mean (`r mean(gapminder$gdpPercap)`) is twice as large as the median (`r median(gapminder$gdpPercap)`)
+
+- GDP per capita data has a large positive skew.
+
+## 3 Life Expectancy by Continent
+
+Life expectancies of Asian countries have steadily increased
+
+```{r years, echo=FALSE}
+yrs <- unique(gapminder$year)
+yrs.seq <- yrs[c(1, 4, 8, 12)]
+
+par(mfrow=c(2,2))
+for (i in yrs.seq) {
+  dat <- gapminder[gapminder$year == i,]
+  boxplot(lifeExp ~ continent, data=dat,
+          main=paste("Life Expectancies in", i),
+          xlab="Continent", ylab="Years",
+          ylim=c(30, 82))
+}
+par(mfrow=c(1,1))
+```
+
+
+## 4 Life Expectancy and GDP per Capita in 2007
+
+- Longest life expectancy: Japan (`r round(max(dat$lifeExp), 1)` years)
+- Highest GDP per capita: Norway (US\$`r format(max(dat$gdpPercap), scientific=FALSE)`)
+- Shortest life expectancy: Swaziland (`r round(min(dat$lifeExp), 1)` years)
+
+```{r gdp-vs-lifeExp, echo=FALSE, fig.width=10, fig.height=6}
+dat <- gapminder[gapminder$year == max(gapminder$year), c(1, 4, 6)]
+
+plot(dat$gdpPercap, dat$lifeExp, pch=16, cex=0.5,
+     xlab="GDP per Capita", ylab="Life Expectancy",
+     main='Plot of 2007 Life Expectancy against 2007 GDP per Capita',
+     ylim=c(30, 90))
+points(x=c(dat$gdpPercap[which.max(dat$lifeExp)], 
+           max(dat$gdpPercap),
+           dat$gdpPercap[which.min(dat$lifeExp)]),
+       y=c(max(dat$lifeExp),
+           dat$lifeExp[which.max(dat$gdpPercap)],
+           min(dat$lifeExp)),
+       pch=16, cex=0.75, col='red')
+text(x=dat$gdpPercap[which.max(dat$lifeExp)], y=max(dat$lifeExp)+2,
+     labels=dat$country[which.max(dat$lifeExp)], cex=0.95)
+text(x=max(dat$gdpPercap), y=dat$lifeExp[which.max(dat$gdpPercap)]+2,
+     labels=dat$country[which.max(dat$gdpPercap)], cex=0.95)
+text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
+     labels=dat$country[which.min(dat$lifeExp)], cex=0.95)
+
+```
+
+## 5 Life Expectancy and GDP per Capita for Canada
+
+- Life expectancy and GDP per capita for Canada have both increased over time
+- The relationship has been approximately linear
+
+```{r Canada, echo=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+can <- gapminder[gapminder$country=='Canada',] #Subset gapminder dataset to Canada's observations
+
+# Plot with year as plot symbol
+plot(can$gdpPercap, can$lifeExp, type='n',
+     xlab="GDP per Capita", ylab="Life Expectancy",
+     main="Data for Canada from 1952 thru 2007")
+text(can$gdpPercap, can$lifeExp, labels=can$year, cex=0.9)
+```
