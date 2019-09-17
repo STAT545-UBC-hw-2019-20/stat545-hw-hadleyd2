@@ -1,9 +1,13 @@
-Exploration of Gapminder
-================
-Dan Hadley
-9/17/2019
+-   [Introduction](#introduction)
+-   [Overview](#overview)
+-   [Analysis](#analysis)
+    -   [2007 Life Expectancy and GPD per
+        Capita](#life-expectancy-and-gpd-per-capita)
+    -   [Canada Life Expectancy and GPD per
+        Capita](#canada-life-expectancy-and-gpd-per-capita)
 
-## Introduction
+Introduction
+------------
 
 We explore the gapminder dataset available in the gapminder package. All
 analyses are performed using three R packages:
@@ -15,7 +19,8 @@ In the first code chunk, excluded from the document, we set the file
 path for the plots rendered by R Markdown and load the above packages
 and `knitr` using the `library` command.
 
-## Overview
+Overview
+--------
 
 To get a feel for the gapminder dataset, we can view the first 6 rows
 using the `head()` function.
@@ -39,7 +44,8 @@ tibble. The dataset contains information on the life expectancy (in
 years), population, and GPD per capita (US$, inflation-adjusted) for 142
 countries from 1952 to 2007 measured every 5 years.
 
-## Analysis
+Analysis
+--------
 
 To get a feel for the dataset, the `summary()` function calclulates the
 minimum, 3rd quartile, median, mean, 1st quartile, and maximum value for
@@ -93,7 +99,7 @@ text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
      labels=dat$country[which.min(dat$lifeExp)], cex=0.75)
 ```
 
-![](hw01_gapminder_files/gpd-vs-lifeExp-1.png)<!-- -->
+![](hw01_gapminder_files/gpd-vs-lifeExp-1.png)
 
 We see from the plot that Japan had the highest life expectancy in 2007
 at 82.6 years and Norway had the highest GDP per capita in 2007 at
@@ -105,8 +111,7 @@ at 39.6 years. The result is a data set with 1704 observations.
 If we are interested in Canada specifically, we can limit our analysis
 to just one country. Suppose we want to plot life expectancy against GDP
 per capita for Canada from 1952 to 2007. In order to add the third
-dimension of time, the plot symbols are the years of the
-observations.
+dimension of time, the plot symbols are the years of the observations.
 
 ``` r
 can <- gapminder[gapminder$country=='Canada',] #Subset gapminder dataset to Canada's observations
