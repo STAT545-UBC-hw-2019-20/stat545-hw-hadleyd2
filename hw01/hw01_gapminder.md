@@ -65,6 +65,21 @@ We see that Africa is the most represented continent with 624 observations, whic
 
 Suppose we are interested in the relationship between Life Expectancy and GDP per capita. We plot life expectancy against GDP per capita for all 142 countries where the most recent year's data, 2007, is available.
 
+``` r
+dat <- gapminder[gapminder$year == max(gapminder$year), c(1, 4, 6)]
+
+plot(dat$gdpPercap, dat$lifeExp, pch=16, cex=0.5,
+     xlab="GPD per Capita", ylab="Life Expectancy",
+     main='Plot of 2007 Life Expectancy against 2007 GPD per Capita',
+     ylim=c(30, 90))
+text(x=dat$gdpPercap[which.max(dat$lifeExp)], y=max(dat$lifeExp)+2,
+     labels=dat$country[which.max(dat$lifeExp)], cex=0.75)
+text(x=max(dat$gdpPercap), y=dat$lifeExp[which.max(dat$gdpPercap)]+2,
+     labels=dat$country[which.max(dat$gdpPercap)], cex=0.75)
+text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
+     labels=dat$country[which.min(dat$lifeExp)], cex=0.75)
+```
+
 ![](hw01_gapminder_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 We see from the plot that Japan had the highest life expectancy in 2007 at 82.6 years and Norway had the highest GDP per capita in 2007 at US$49357.19. Meanwhile, Swaziland had the lowest life expectancy in 2007 at 39.6 years. The result is a data set with 1704 observations.

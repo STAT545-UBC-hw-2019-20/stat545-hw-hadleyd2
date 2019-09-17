@@ -39,7 +39,7 @@ We see that Africa is the most represented continent with `r max(cnt$continent)`
 
 Suppose we are interested in the relationship between Life Expectancy and GDP per capita.  We plot life expectancy against GDP per capita for all `r nrow(gapminder[gapminder$year == max(gapminder$year),])` countries where the most recent year's data, `r max(gapminder$year)`, is available.
 
-```{r echo=FALSE}
+```{r}
 dat <- gapminder[gapminder$year == max(gapminder$year), c(1, 4, 6)]
 
 plot(dat$gdpPercap, dat$lifeExp, pch=16, cex=0.5,
