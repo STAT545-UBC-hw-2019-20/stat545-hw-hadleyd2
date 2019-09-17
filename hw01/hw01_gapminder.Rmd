@@ -29,8 +29,21 @@ In the first code chunk, excluded from the document, we set the file path for th
 
 ## Overview
 
+To start, we can view the columns in the dataset using `R`'s `names()` function.
+```{r colnames, echo=FALSE}
+names(gapminder)
+```
+
+The columns in the dataset are Country, Continent, Year, Life Expectancy, Population, and GPD per capita.  To see the data type for each column, we can view the structure of the dataset via the `str()` function.
+```{r structure, echo=FALSE}
+str(gapminder)
+```
+
+This reports the object's class, as well as the data type for each column.  Note that both country and continent are labeled as factors.  Factor is a data type in `R` used for character data, essentially treating each unique character entry as a group.  Knowing the data type for each column gives us an idea of the type of functions we can apply to each column or if the data type should be changed to something more appropriate.
+
+
 To get a feel for the gapminder dataset, we can view the first 6 rows using the `head()` function.
-```{r}
+```{r, echo=FALSE}
 head(gapminder)
 ```
 

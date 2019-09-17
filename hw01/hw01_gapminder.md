@@ -22,12 +22,34 @@ and `knitr` using the `library` command.
 Overview
 --------
 
+To start, we can view the columns in the dataset using `R`’s `names()`
+function.
+
+    ## [1] "country"   "continent" "year"      "lifeExp"   "pop"       "gdpPercap"
+
+The columns in the dataset are Country, Continent, Year, Life
+Expectancy, Population, and GPD per capita. To see the data type for
+each column, we can view the structure of the dataset via the `str()`
+function.
+
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    1704 obs. of  6 variables:
+    ##  $ country  : Factor w/ 142 levels "Afghanistan",..: 1 1 1 1 1 1 1 1 1 1 ...
+    ##  $ continent: Factor w/ 5 levels "Africa","Americas",..: 3 3 3 3 3 3 3 3 3 3 ...
+    ##  $ year     : int  1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+    ##  $ lifeExp  : num  28.8 30.3 32 34 36.1 ...
+    ##  $ pop      : int  8425333 9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 ...
+    ##  $ gdpPercap: num  779 821 853 836 740 ...
+
+This reports the object’s class, as well as the data type for each
+column. Note that both country and continent are labeled as factors.
+Factor is a data type in `R` used for character data, essentially
+treating each unique character entry as a group. Knowing the data type
+for each column gives us an idea of the type of functions we can apply
+to each column or if the data type should be changed to something more
+appropriate.
+
 To get a feel for the gapminder dataset, we can view the first 6 rows
 using the `head()` function.
-
-``` r
-head(gapminder)
-```
 
     ## # A tibble: 6 x 6
     ##   country     continent  year lifeExp      pop gdpPercap
