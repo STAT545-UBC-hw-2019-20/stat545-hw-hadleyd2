@@ -12,7 +12,7 @@ Dan Hadley
 
 We explore the gapminder dataset available in the gapminder package. All analyses are performed using three R packages: [gapminder](https://cran.r-project.org/web/packages/gapminder/index.html), [tibble](https://cran.r-project.org/web/packages/tibble/index.html), [DT](https://cran.r-project.org/web/packages/DT/index.html).
 
-The first code chunk, excluded from the document, loads these packages using the `library` command.
+In the first code chunk, excluded from the document, we set the file path for the plots rendered by R Markdown and load the above packages and `knitr` using the `library` command.
 
 2. Overview
 -----------
