@@ -84,7 +84,7 @@ text(x=dat$gdpPercap[which.min(dat$lifeExp)], y=min(dat$lifeExp)-2,
      labels=dat$country[which.min(dat$lifeExp)], cex=0.75)
 ```
 
-![](hw01_gapminder_files/figure-markdown_github/gpd-vs-lifeExp-1.png)
+![](hw01_gapminder_files/gpd-vs-lifeExp-1.png)
 
 We see from the plot that Japan had the highest life expectancy in 2007 at 82.6 years and Norway had the highest GDP per capita in 2007 at US$49357.19. Meanwhile, Swaziland had the lowest life expectancy in 2007 at 39.6 years. The result is a data set with 1704 observations.
 
@@ -100,4 +100,4 @@ plot(can$gdpPercap, can$lifeExp, type='n',
 text(can$gdpPercap, can$lifeExp, labels=can$year, cex=0.8)
 ```
 
-![Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada every five years from 1952 to 2007](hw01_gapminder_files/figure-markdown_github/Canada-1.png)
+![Plot of Life Expectancy (years) versus GPD per capita (USD) in Canada every five years from 1952 to 2007](hw01_gapminder_files/Canada-1.png)

@@ -9,7 +9,8 @@ output:
 ---
 
 ```{r setup, include=FALSE, echo=FALSE,warning=FALSE}
-options(knitr.kable.NA = '')
+knitr::opts_chunk$set(
+  fig.path = "hw01_gapminder_files/")
 ```
 
 ## 1. Introduction
@@ -18,6 +19,7 @@ We explore the gapminder dataset available in the gapminder package.  All analys
 
 The first code chunk, excluded from the document, loads these packages using the `library` command.
 ```{r load, echo=FALSE}
+library(knitr)
 library(gapminder)
 library(tibble)
 library(DT)
