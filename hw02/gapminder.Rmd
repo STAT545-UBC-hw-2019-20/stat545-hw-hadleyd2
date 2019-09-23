@@ -152,7 +152,6 @@ gapminder %>%
   select(lifeExp) %>% 
   summary() %>% 
   kable()
-  
-
-
 ```
+
+# Question 3
