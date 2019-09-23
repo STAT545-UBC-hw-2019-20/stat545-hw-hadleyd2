@@ -36,7 +36,7 @@ suppressPackageStartupMessages(library(gapminder)) #to use the tibble dataset ga
 suppressPackageStartupMessages(library(tidyverse)) #to load in dplyr package
 suppressPackageStartupMessages(library(DT)) #to nicely display tibbles with datatable()
 suppressPackageStartupMessages(library(knitr)) #display tables in HTML for R output with kable()
-suppressPackageStartupMessages(library(kableExtra)) #options for kable()
+suppressPackageStartupMessages(library(gridExtra)) #change the layout of multiple ggplots()
 ```
     
 # Question 1
@@ -128,30 +128,88 @@ We analyze the `continent` categorical variable, listing the continent for each 
 
 A bar plot for continent shows the possible values of the `continent` variable as well as giving a sense of the spread of the observations by showing which continents are most/least observed, etc.
 
-```{r continent, fig.cap="Number of observations from each continent"}
+```{r continent}
 ggplot(gapminder, aes(continent)) + 
   geom_bar() + 
+  ggtitle('Count of Observations by Continent') + 
+  theme(plot.title = element_text(color='black', face="bold")) + 
   ylab('Number of Observations') +
   xlab('Continent')
 ```
 
 For life expectancy, 
-```{r lifeExp}
-ggplot(gapminder, aes(lifeExp)) + 
+```{r lifeExp, fig.width=10, fig.height=3}
+plot1 <- ggplot(gapminder, aes(lifeExp)) + 
   geom_histogram(bins=50) + 
-  ggtitle('Histogram of Life Expectancies')
+  ggtitle('Histogram of Life Expectancies') + 
+  xlab('Life Expectancy') + 
+  ylab('Number of Observations') + 
+  theme(plot.title = element_text(color='black', face="bold"))
 
-ggplot(gapminder, aes(y=lifeExp)) + 
+plot2 <- ggplot(gapminder, aes(y=lifeExp)) + 
   geom_boxplot() + 
-  ggtitle('Boxplot of Life Expectancies')
+  ggtitle('Boxplot of Life Expectancies') + 
+  ylab('Life Expectancy') + 
+  xlab('') + 
+  theme(plot.title = element_text(color='black', face="bold"), 
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 
-ggplot(gapminder, aes(lifeExp)) + 
-  geom_density()
+plot3 <- ggplot(gapminder, aes(lifeExp)) + 
+  geom_density() + 
+  ggtitle('Density of Life Expectancies') + 
+  ylab('Density') + 
+  xlab('Life Expectancy') + 
+  theme(plot.title = element_text(color='black', face="bold"))
 
-gapminder %>% 
-  select(lifeExp) %>% 
-  summary() %>% 
-  kable()
+grid.arrange(plot1, plot2, plot3, nrow=1, ncol=3)
+
+summ.le <- summary(gapminder$lifeExp)
+names(summ.le) <- c('Minimum', 'First Quartile', 'Median', 'Mean', 'Third Quartile', 'Maximum')
+summ.le <- data.frame(rbind(round(summ.le, 2)), row.names = 'Life Expectancy')
+kable(summ.le)
+
 ```
 
 # Question 3
+
+We now make two plots with some value for anlaysis.  The first plot is a scatterplot of GDP per capita by continent versus population-weighted mean life expectancy.  To calculate GDP per capita, we multiply each country in a continent by its popuSince we took a look at both continent and life expectancy in Question 2, we may want to view life expectancies by continent.  In order to compare the distribution of life expectancies across continents, we look at a boxplot.
+
+```{r Q3, fig.width=8, fig.height=4}
+
+## Population by Continent/Year
+gapminder %>% 
+  group_by(continent, year) %>% 
+  mutate(wgt.lifeExp=weighted.mean(lifeExp, w=pop)) %>% 
+  mutate(tot.pop=as.numeric(sum(pop)), tot.gdp=as.numeric(sum(pop*gdpPercap))) %>%  #as.numeric() needed for precision
+  mutate(tot.gdpPer=round(tot.gdp/tot.pop, 2)) %>% #GDP per capita by continent
+  ggplot(aes(x=tot.gdpPer, y=wgt.lifeExp)) + 
+  geom_point(aes(shape=continent, color=continent, size=year)) + 
+  scale_x_continuous('Continent GDP per Capita', labels=scales::dollar_format()) + 
+  ylab('Populated Weighted Mean Life Expectancy') + 
+  ggtitle('Continent Level GDP vs Life Expectancy') + 
+  theme(plot.title = element_text(color='black', face="bold"))
+```
+
+```{r plot2, fig.width=9, fig.height=4}
+plot1 <- ggplot(gapminder, aes(x=continent, y=lifeExp)) + 
+  geom_boxplot() + 
+  xlab('Continent') + 
+  ylab('Life Expectancy') + 
+  ggtitle('Life Expectancy by Continent') + 
+  theme(plot.title = element_text(color='black', face="bold"))
+
+plot2 <- gapminder %>% 
+  group_by(continent) %>% 
+  mutate(Result=n_distinct(country)) %>% 
+  select(continent, Result) %>% 
+  unique() %>% 
+  ggplot(aes(x=continent, y=Result)) +
+  geom_col() +
+  ggtitle('Number of Countries from Each Continent') + 
+  ylab('Number of Unique Countries') +
+  xlab('Continent') + 
+  theme(plot.title = element_text(color='black', face="bold"))
+
+grid.arrange(plot1, plot2, nrow=1, ncol=2)
+```
