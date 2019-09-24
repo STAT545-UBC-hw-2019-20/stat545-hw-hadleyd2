@@ -59,10 +59,10 @@ Using the `filter()` function from the `dplyr` package, we filter the gapminder 
 
 ```{r displaytibble}
 ## Create data with 3 countries' observations in the 1970's based on largest populations from first 1970's observation
-(gap.3 <- gapminder %>% 
+gap.3 <- gapminder %>% 
    filter(year > 1969,
           year < 1980,
-          country %in% ctries)) 
+          country %in% ctries) 
 kable(gap.3, digits=2)
 ```
 
