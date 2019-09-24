@@ -15,19 +15,6 @@ knitr::opts_chunk$set(error = TRUE,
                       fig.path = "gapminder_files/")
 ```
 
-**Optional, but recommended startup**:
-
-1. Change the file output to both html and md _documents_ (not notebook).
-
-2. `knit` the document. 
-
-3. Stage and commit the rmd, and knitted documents.
-
-# Intro to `dplyr` syntax
-
-Load the `gapminder` and `tidyverse` packages. Hint: `suppressPackageStartupMessages()`!
-    - This loads `dplyr`, too.
-
 <!---The following chunk loads the appropriate libraries--->
 
 ```{r load packages, echo=FALSE, warning = FALSE, message = FALSE}
@@ -80,7 +67,7 @@ Using the `filter()` function from the `dplyr` package, we filter the gapminder 
 
 ## 1.2 Use Pipe Operator to Select Country and GDP per Capita:
 
-The `select()` function from the `dplyr` package makes it very easy to choose which columns to display from a dataset.
+The `select()` function from the `dplyr` package makes it very easy to choose which columns to display from a dataset.  For this question, we select the "country" and "gdpPercap" columns from the filtered dataset presented in 1.1.
 
 ```{r pipe}
 ## Select country and gdpPercap columns from filtered dataset
@@ -90,7 +77,7 @@ gap.3 %>%
 
 ## 1.3 Filter `gapminder` to observations with drop in Life Expectancy:
 
-First, we can use the `mutate()` function to add a column to the `gapminder` dataset that calculates the 5-year change in life expectancy, in years, for each country.  This column is named `changeinlifeExp`.  For each country's first year observation, the change is 0.  Using this new column, we can filter out observations whose 5-year life expectancy change is negative.  When displaying the negative life expectancy changes, the change values are rounded to two decimal places.  Thus, a change that displays `0` is actually a negative change smaller than `-0.005`.
+We use the `mutate()` function to add a column to the `gapminder` dataset that calculates the change in life expectancy, in years, for each observation.  This column is named "changeinlifeExp".  For each country's first observation, the change is $0$.  Using this new column, we filter out observations whose life expectancy change is negative.  When displaying the life expectancy changes for observations with negative changes, one should note that the values are rounded to two decimal places and a change that displays $0$ is actually a negative change between in the interval $(0, -0.005)$.
 
 ```{r LifeExp}
 gapminder %>% 
@@ -101,7 +88,9 @@ gapminder %>%
   datatable()
 ```
 
-## 1.4 Show maximum Country GDP per Capita for each Country
+## 1.4 Show maximum Country GDP per Capita for each Country:
+
+Using the `group_by()` and `summarise()` functions, this request can be acheived in only a few lines.
 
 ```{r maxGDP}
 gapminder %>% 
@@ -110,23 +99,24 @@ gapminder %>%
   datatable()
 ```
 
-## 1.5 Scatterplot of Canada's Life Expectancy vs. GDP per Capita
+## 1.5 Scatterplot of Canada's Life Expectancy vs. GDP per Capita:
+
+By using the `filter()` function, we can pipe the filtered dataset directly into `ggplot()` to create the desired scatterplot.
 
 ```{r scatterplot, fig.width=8, fig.height=4}
 gapminder %>% 
   filter(country == 'Canada') %>% 
   ggplot(aes(gdpPercap, lifeExp)) +
   geom_point() + 
-  ggtitle('Canada') + 
-  scale_x_log10('GDP per Capita', labels=scales::dollar_format()) + 
+  ggtitle('Canada Life Expectancy vs. GDP per Capita') + 
+  theme(plot.title = element_text(color='black', face="bold")) +
+  scale_x_log10('GDP per Capita on Log Scale', labels=scales::dollar_format()) + 
   ylab('Life Expectancy')
 ```
 
 # Question 2
 
-We analyze the `continent` categorical variable, listing the continent for each observation, and the `lifeExp` quantitative varible, which gives each observation's life expectancy in years.
-
-A bar plot for continent shows the possible values of the `continent` variable as well as giving a sense of the spread of the observations by showing which continents are most/least observed, etc.
+We analyze the "continent" categorical variable and the "lifeExp" quantitative varible, which gives the continent for each observation and each observation's life expectancy in years, respectively.  A bar plot for continent shows the possible values of the "continent" variable as well as giving the number of observations from each continent.  The continent with the most observations is `r gapminder %>% group_by(continent) %>% count() %>% arrange(desc(n)) %>% .$continent %>% as.character() %>% .[1]` with `r gapminder %>% group_by(continent) %>% count() %>% .$n %>% max()`.  The continent with the least number of observations is `r gapminder %>% group_by(continent) %>% count() %>% arrange(n) %>% .$continent %>% as.character() %>% .[1]` with `r gapminder %>% group_by(continent) %>% count() %>% .$n %>% min()`.
 
 ```{r continent}
 ggplot(gapminder, aes(continent)) + 
@@ -137,7 +127,7 @@ ggplot(gapminder, aes(continent)) +
   xlab('Continent')
 ```
 
-For life expectancy, 
+For life expectancy, we show the range of the values and distribution through a histogram, boxplot, and density plot.  We then present summary statistics for life expectancy.  We see the distribution might be bimodal with the mode around 70.  
 ```{r lifeExp, fig.width=10, fig.height=3}
 plot1 <- ggplot(gapminder, aes(lifeExp)) + 
   geom_histogram(bins=50) + 
@@ -173,7 +163,7 @@ kable(summ.le)
 
 # Question 3
 
-We now make two plots with some value for anlaysis.  The first plot is a scatterplot of GDP per capita by continent versus population-weighted mean life expectancy.  To calculate GDP per capita, we multiply each country in a continent by its popuSince we took a look at both continent and life expectancy in Question 2, we may want to view life expectancies by continent.  In order to compare the distribution of life expectancies across continents, we look at a boxplot.
+We now make two plots that can have value for some anlaysis.  The first plot is a scatterplot of GDP per capita by continent versus population-weighted mean life expectancy for each year in the dataset.  This can give us a sense of how life expectancy is changing by continent.  The point of population-weighting the mean life expectancy is so countries with larger populations have more impact on the continent-wide life expectancy.  To calculate GDP per capita, we multiply each country in a continent by its population to get country GDP.  Then by summing country GDP for all countries in a continent, we then divide by the sum of population for all countries on a continent.  This process is repeated for each year in the study.  In order to compare continent life expectancies over time, we use larger plotting symbols for more recent observations.
 
 ```{r Q3, fig.width=8, fig.height=4}
 
@@ -190,6 +180,8 @@ gapminder %>%
   ggtitle('Continent Level GDP vs Life Expectancy') + 
   theme(plot.title = element_text(color='black', face="bold"))
 ```
+
+Finally, we compare life expectancies across continents again by use of a boxplot.  Since the distribution of life expectancies may be affected by the number of observations in each continent, we also present a bar plot for the number of countries that have data in each continent.  Thus, while Oceania seems to have a very high life expectancy with low variation, the small number of countries collected in the dataset may not be a true representative sample of the entire continent.
 
 ```{r plot2, fig.width=9, fig.height=4}
 plot1 <- ggplot(gapminder, aes(x=continent, y=lifeExp)) + 
