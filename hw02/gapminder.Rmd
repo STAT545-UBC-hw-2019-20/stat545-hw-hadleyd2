@@ -207,3 +207,17 @@ plot2 <- gapminder %>%
 
 grid.arrange(plot1, plot2, nrow=1, ncol=2)
 ```
+
+
+# Recycling (Optional):
+
+The results of the code `filter(gapminder, country == c("Rwanda", "Afghanistan"))` are presented below:
+
+```{r recycling, echo=FALSE}
+datatable(filter(gapminder, country == c("Rwanda", "Afghanistan")))
+```
+
+The result of the code is to return 6 entries for Rwanda and Afghanistan.  The analyst is unable to get all of the data for Rwanda and Afghanistan.  The code fetches Rwanda for 1952, Afghanistan for 1957, Rwanda for 1962, etc.  The country fetched for each year in the dataset alternates between Rwanda and Afghanistan.  The correct code to fetch this data is `filter(gapminder, country=="Rwanda" | country=="Afghanistan")`.
+```{r correct, echo=FALSE}
+datatable(filter(gapminder, country=="Rwanda" | country=="Afghanistan"))
+```
