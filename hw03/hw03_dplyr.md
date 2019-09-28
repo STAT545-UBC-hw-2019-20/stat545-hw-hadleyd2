@@ -8,21 +8,14 @@ output:
     toc: true
     toc_float: true
 ---
-<!--This is to set up the two-column and clearer output formats-->
-<style type="text/css">
-.twoC {width: 100%}
-.clearer {clear: both}
-.twoC .table {max-width: 50%; float: right}
-.twoC img {max-width: 50%; float: left}
-</style>
 
 
 
 
-### Task Option 2
-##### Get the maximum and minimum of GDP per capita for all continents.
+## Task Option 2
 
-<div class="twoC">
+### Max and Min GDP per Capita for all Continents.
+
 
 ```r
 o2 <- gapminder %>%
@@ -57,7 +50,6 @@ o2g <- gapminder %>%
 
 The table and graph here show the minimum and maximum GDP per capita for each continent. The graph has extra information by providing the trend in minimum and maximum GDP per capita over the study period, while the horizontal lines match the table data by showing the absolute minimums and maximums recorded for each continent.
 
-<div class="twoC">
 
 continent    minGDP   maxGDP
 ----------  -------  -------
@@ -68,13 +60,12 @@ Europe          974    49357
 Oceania       10040    34435
 
 ![](hw03_files/opt_2_output-1.png)<!-- -->
-</div>
-<div class="clearer"></div>
 
 
 
-### Task Option 3
-##### Look at the spread of GDP per capita within the continents.
+## Task Option 3
+
+### Spread of GDP per Capita within Continents
 
 
 
@@ -100,7 +91,6 @@ o3g <- gapminder %>%
 
 The table here shows the statistical summary describing GDP per capita over the 1952 to 2007 period. The graph also illustrates the full range of data plots by using a jittered layout to show every data point in the dataset. The log scale on the graph makes it easier to see detail at the lower end of the y-axis.
 
-<div class="twoC">
 
 continent       Min.   1st Qu.    Median      Mean   3rd Qu.       Max.
 ----------  --------  --------  --------  --------  --------  ---------
@@ -111,13 +101,12 @@ Europe         973.5    7213.1   12081.7   14469.5   20461.4    49357.2
 Oceania      10039.6   14141.9   17983.3   18621.6   22214.1    34435.4
 
 ![](hw03_files/opt_3_output-1.png)<!-- -->
-</div>
-<div class="clearer"></div>
 
 
 
-### Task Option 6
-##### Find countries with interesting stories.
+## Task Option 6
+
+### Countries with interesting stories.
 
 
 ```r
@@ -185,7 +174,6 @@ o6g <-  df1 %>%
 
 I looked for patterns in population change by country over the course of the dataset. Equatorial Guinea and Kuwait stood out because they both have periods that rank among the highest and lowest 5-year population changes among all countries. This is due to armed conflict, with Equatorial Guinea having a period of political violence and war in the 1970's and Kuwait being in conflict with Iraq in the late 1980's and early 1990's. The table and graph both show percentage change over 5-year periods.
 
-<div class="twoC">
 
  meanPopChg_Year   Eq_Guinea   Kuwait   Other
 ----------------  ----------  -------  ------
@@ -202,6 +190,4 @@ I looked for patterns in population change by country over the course of the dat
             2007        10.1     15.7     6.9
 
 ![](hw03_files/opt_6_display-1.png)<!-- -->
-</div>
-<div class="clearer"></div>
 
