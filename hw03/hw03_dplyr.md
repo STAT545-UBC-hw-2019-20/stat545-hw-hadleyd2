@@ -64,7 +64,7 @@ Table: Table 1: Minimum and Maximum Country Level GDP per Capita by Continent an
   Europe          973.53         Bosnia and Herzegovina               1952                49357.19                Norway                       2007          
   Oceania        10039.60               Australia                     1952                34435.37               Australia                     2007          
 
-Boxplots of the country-level GDP per capita's by continent are given in Figure 1.  This plot is created using the `geom_boxplot()` function to create the boxplot layer along with `geom_point()` to highlight the maximum and minimums.  These functions are layers of the `ggplot` function from the `ggplot2` package.  The benefit of this plot is that the minimums and maximums are not always perceived as outliers in the boxplots due to the log scale used on the y-axis.  Thus, expliciting highlighting the points reaffirms their position on the boxplot.
+Boxplots of the country-level GDP per capita's by continent are given in Figure 1.  This plot is created using the `geom_boxplot()` function to create the boxplot layer along with `geom_point()` to highlight the maximum and minimums.  These functions are layers of the `ggplot` function from the `ggplot2` package.  The benefit of this plot is that the minimums and maximums are not always perceived as outliers in the boxplots due to the log scale used on the y-axis.  Thus, expliciting highlighting the points reaffirms their position on the boxplot.  I used code from the following [stackoverflow thread](https://stackoverflow.com/questions/17148679/construct-a-manual-legend-for-a-complicated-plot) to create the custom legend.
 
 
 ```r
@@ -123,8 +123,9 @@ Table: Table 2: Minimum and Maximum Continent Level GDP per Capita and the corre
 
 Task Option 3 asks us to look at the spread of the country-level GDP per capita data within the continents.  To do this, we create
 
-  1. Table 3, which shows summary statistics for the distribution of GDP per capita for each continent,
-  2. Figure 2, which plots country GDP per capita against continent as a jittered scatterplot.
+  1. a tibble called `gdp.spread` which is used to create a table of summary statistics on country-level GDP per capita and a jittered scatterplot,
+  2. Table 3, which shows summary statistics for the distribution of GDP per capita for each continent,
+  3. Figure 2, which plots country GDP per capita against continent as a jittered scatterplot.
 
 
 ```r
@@ -181,3 +182,57 @@ gapminder %>%
 ## Task Option 4
 
 ### Population-weighted Life Expectancy
+
+For this task, we
+
+  1. create a tibble called `life.exp` which includes population-weighted life expectancy across all countries for each year, which we refer to as the global life expectancy, and population-weighted life expectancies for the countries within each continent for each year,
+  2. create Table 4 to show the global life expectancies and continent life expectancies, weighted by country population, for each year,
+  3. create Figure 3, a time series plot of the global life expectancies and the continent life expectancies weighted by country population.
+
+
+```r
+life.exp <- gapminder %>% 
+  group_by(year) %>% 
+  mutate(global = weighted.mean(lifeExp, w=pop)) %>% 
+  ungroup() %>% 
+  group_by(continent, year) %>% 
+  mutate(cont.le = weighted.mean(lifeExp, w=pop)) %>% 
+  ungroup() %>%
+  group_by(year) %>%
+  summarize(Global=unique(global),
+            Africa=unique(cont.le[continent == 'Africa']),
+            Americas=unique(cont.le[continent == 'Americas']),
+            Asia=unique(cont.le[continent == 'Asia']),
+            Europe=unique(cont.le[continent == 'Europe']),
+            Oceania=unique(cont.le[continent == 'Oceania'])) %>%
+  mutate_all(~round(., 2))
+
+datatable(life.exp, colnames=c('Year', names(life.exp[-1])), caption=tab.cap[4])
+```
+
+<!--html_preserve--><div id="htmlwidget-cd91b5264f5122eea443" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cd91b5264f5122eea443">{"x":{"filter":"none","caption":"<caption>Table 4: Life expectancies (in years) using population-weighted means across all countries globally and within continents<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10","11","12"],[1952,1957,1962,1967,1972,1977,1982,1987,1992,1997,2002,2007],[48.94,52.12,52.32,56.98,59.51,61.24,62.88,64.42,65.65,66.85,67.84,68.92],[38.8,40.94,43.1,45.18,47.21,49.21,51.02,52.82,53.37,53.28,53.3,54.56],[60.24,62.02,63.44,64.51,65.7,67.61,69.19,70.36,71.72,73.19,74.25,75.36],[42.94,47.29,46.57,53.88,57.52,59.56,61.57,63.54,65.15,66.77,68.14,69.44],[64.91,66.89,68.46,69.55,70.47,71.54,72.56,73.45,74.44,75.71,77.02,77.89],[69.17,70.32,70.99,71.18,71.92,73.26,74.58,75.98,77.36,78.62,80.16,81.06]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Year<\/th>\n      <th>Global<\/th>\n      <th>Africa<\/th>\n      <th>Americas<\/th>\n      <th>Asia<\/th>\n      <th>Europe<\/th>\n      <th>Oceania<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+Since the Table 4 does not make it easy to visualize trends or make comparisons, the following plot shows a time series of the population-weighted life expectancies for all countries and population-weighted life expectancies for countries within each continent.  There is an obvious upward trend in life expectancies over time.
+
+
+```r
+Global <- as_tibble(data.frame('continent'=rep('Global', nrow(life.exp)), 'year'=life.exp$year, 'cont.le'=life.exp$Global, stringsAsFactors=FALSE))
+
+gapminder %>% 
+  group_by(year) %>% 
+  mutate(global = weighted.mean(lifeExp, w=pop)) %>% 
+  ungroup() %>% 
+  group_by(continent, year) %>% 
+  summarize(cont.le = weighted.mean(lifeExp, w=pop)) %>%
+  ungroup() %>% 
+  mutate(continent=as.character(continent)) %>% 
+  rbind(., Global) %>% 
+  mutate_at(vars(continent), ~as.factor(.)) %>% 
+  ggplot(aes(x=year, y=cont.le, colour=continent, linetype=continent)) +
+  geom_line() +
+  labs(title="Population-Weighted Life Expectancies", color="", linetype="",
+       x='Year', y='Life Expectancy (years)')
+```
+
+![Figure 3: Global life expectancy and continent-level life expectancies over time](hw03_files/timeseries-1.png)
