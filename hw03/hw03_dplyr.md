@@ -11,57 +11,115 @@ output:
 
 
 
+## Introduction
+
+The gapminder dataset from the `gapminder` package is used for all analysis throughout this report.  Assignment 3 lists 6 different tasks and asks that we choose 3 out of the 6 tasks.  In this report, I have chosen
+
+  * __Task Option 2__ - Get the maximum and minimum of GDP per capita for all continents
+  * __Task Option 3__ - Look at the spread of GDP per capita within the continents
+  * __Task Option 6__ - Find countries with interesting stories
+
+***
 
 ## Task Option 2
 
-### Max and Min GDP per Capita for all Continents.
+### Max and Min GDP
+
+Task Option 2 requests the maximum and minimum GDP per capita for all continents.  For this task, we produce
+
+  1. a tibble called `mm.gpd` containing data for the maximum and minimum GDP per capita calculated by using the `group_by()` and `summarize()` functions from the `dplyr` package that is loaded via the `tidyverse` package and the respective corresponding countries and years,
+  2. Table 1, displaying the country-level maximum and minimum GDP per capita from the `mm.gpd` tibble using the `kable()` function from the `knitr` package,
+  3. Figure 1, a boxplot of the country-level GDP per capita data by continent using the `geom_boxplot()` function from `ggplot2` and coloring the points of the maximum country-level GDP per capita green and the minimum as red using the `geom_point()` function together with specifying colours in `aes()`,
+  4. Table 2, displaying the minimum and maximum continent-level GDP per capita per year calculated as a population-weighted average of the country-level GDP per capita's in each continent.
 
 
 ```r
-o2 <- gapminder %>%
-        group_by(continent) %>%
-        summarize(minGDP=min(gdpPercap) %>% round(digits=0),
-                  maxGDP=max(gdpPercap) %>% round(digits=0))
+## Create tibble of maximum and minimum country-level GDP per capita by continent
+mm.gdp <- gapminder %>%
+  group_by(continent) %>%
+  summarize(minGDP = min(gdpPercap), #Minimum GDP
+            mincountry = country[gdpPercap == minGDP], #Corresponding Country
+            minyear = year[gdpPercap == minGDP], #Corresponding Year
+            maxGDP = max(gdpPercap), #Maximum GDP
+            maxcountry = country[gdpPercap == maxGDP], #Corresponding Country
+            maxyear = year[gdpPercap == maxGDP]) %>% #Corresponding Year
+  mutate_at(vars(minGDP, maxGDP), ~round(., 2)) #round min/max GDP to 2 decimal places
+
+## Table of minimum and maximum GDP
+# datatable(mm.gdp, colnames=c('Continent', 'Minimum GDP', 'Min GDP Country', 'Min GDP Year', 
+#                              'Maximum GDP', 'Max GDP Country', 'Max GDP Year'), 
+#           caption='Table 1: Minimum and Maximum Country Level GDP per Capita by Continent and the corresponding countries and years')
+
+kable(mm.gdp, col.names=c('Continent', 'Minimum<br>GDP', 'Minimum<br>GDP<br>Country', 'Minimum<br>GDP<br>Year', 
+                             'Maximum<br>GDP', 'Maximum<br>GDP<br>Country', 'Maximum<br>GDP<br>Year'), 
+      caption='Table 1: Minimum and Maximum Country Level GDP per Capita by Continent and the corresponding countries and years',
+      align=rep('c', ncol(mm.gdp)))
 ```
+
+
+
+Table: Table 1: Minimum and Maximum Country Level GDP per Capita by Continent and the corresponding countries and years
+
+ Continent    Minimum<br>GDP    Minimum<br>GDP<br>Country    Minimum<br>GDP<br>Year    Maximum<br>GDP    Maximum<br>GDP<br>Country    Maximum<br>GDP<br>Year 
+-----------  ----------------  ---------------------------  ------------------------  ----------------  ---------------------------  ------------------------
+  Africa          241.17            Congo, Dem. Rep.                  2002                21951.21                 Libya                       1977          
+ Americas        1201.64                  Haiti                       2007                42951.65             United States                   2007          
+   Asia           331.00                 Myanmar                      1952               113523.13                Kuwait                       1957          
+  Europe          973.53         Bosnia and Herzegovina               1952                49357.19                Norway                       2007          
+  Oceania        10039.60               Australia                     1952                34435.37               Australia                     2007          
+
+Boxplots of the country-level GDP per capita's by continent are given in Figure 1.  This plot is created using the `geom_boxplot()` function to create the boxplot layer along with `geom_point()` to highlight the maximum and minimums.  These functions are layers of the `ggplot` function from the `ggplot2` package.  The benefit of this plot is that the minimums are not always perceived as outliers in the boxplots.  Thus, displaying them is necessary if we want to focus on the maximum and minimums.
 
 
 ```r
-o2g <- gapminder %>%
-        group_by(continent,year) %>%
-        summarize(minGDP_yr=min(gdpPercap) %>% round(digits=0),
-                  maxGDP_yr=max(gdpPercap) %>% round(digits=0)) %>% #get annual min and max
-        ungroup() %>%
-        group_by(continent) %>%
-        mutate(minGDP=min(minGDP_yr),
-                  maxGDP=max(maxGDP_yr)) %>% #get overall min and max
-          ggplot(aes(x=year,y=minGDP_yr, colour=continent)) +
-            geom_line(linetype=2) + #annual trend
-            geom_line(aes(x=year, y=maxGDP_yr, colour=continent),linetype=2) + #annual trend
-            geom_line(aes(x=year,y=minGDP), size=1.5) + #overall min
-            geom_line(aes(x=year,y=maxGDP), size=1.5) + #overall max
-            scale_y_log10(labels=scales::dollar_format()) +
-            theme(axis.text.x = element_text(angle = 90)) +
-            labs(x="",
-                 y="GDP per capita, US $ (inflation-adjusted)",
-                 colour="Continent",
-                 title="Minimum and maximum GDP per capita by continent, 1952 to 2007") +
-            facet_wrap(~continent)
+clrs <- c("Maximum"="#62c76b", "Minimum"="#f04546")
+gapminder %>% 
+  ggplot(aes(x=continent, y=gdpPercap)) +
+  geom_boxplot() +
+  geom_point(data=mm.gdp, aes(x=continent, y=minGDP, colour="Minimum")) + 
+  geom_point(data=mm.gdp, aes(x=continent, y=maxGDP, colour="Maximum")) +
+  ggtitle(label='Boxplot of Country GDP per Capita by Continent') +
+  xlab('Continent') + 
+  scale_y_continuous('Country GDP per Capita', labels=scales::dollar_format()) +
+  scale_colour_manual(name="Min/Max GDP",values=clrs) +
+  theme_bw()
 ```
 
-The table and graph here show the minimum and maximum GDP per capita for each continent. The graph has extra information by providing the trend in minimum and maximum GDP per capita over the study period, while the horizontal lines match the table data by showing the absolute minimums and maximums recorded for each continent.
+![Figure 1: Boxplots of Country-level GDP per Capita by Continent with highlighted Maximum and Minimum values](hw03_files/boxplot-1.png)
+
+We also calculate continent-level GDP per capita using a population-weighted mean of the country level GDP per capita's for each continent.  This is done for each year in the tibble.  Table 2 displays the minimum and maximum continent-level GDP per capita's and corresponding years.
 
 
-continent    minGDP   maxGDP
-----------  -------  -------
-Africa          241    21951
-Americas       1202    42952
-Asia            331   113523
-Europe          974    49357
-Oceania       10040    34435
+```r
+mm.gdp2 <- gapminder %>% 
+  group_by(continent, year) %>% 
+  summarize(contGDP = min(weighted.mean(gdpPercap, w=pop))) %>% 
+  summarize(minGDP = contGDP[which.min(contGDP)],
+            minyear = year[which.min(contGDP)],
+            maxGDP = contGDP[which.max(contGDP)],
+            maxyear = year[which.max(contGDP)]) %>% 
+  mutate_at(vars(minGDP, maxGDP), ~round(., 2))
+  
 
-![](hw03_files/opt_2_output-1.png)<!-- -->
+kable(mm.gdp2, col.names=c('Continent', 'Minimum<br>GDP', 'Minimum<br>GDP<br>Year', 
+                             'Maximum<br>GDP', 'Maximum<br>GDP<br>Year'), 
+      caption='Table 1: Minimum and Maximum Continent Level GDP per Capita and the corresponding year',
+      align=rep('c', ncol(mm.gdp)))
+```
 
 
+
+Table: Table 1: Minimum and Maximum Continent Level GDP per Capita and the corresponding year
+
+ Continent    Minimum<br>GDP    Minimum<br>GDP<br>Year    Maximum<br>GDP    Maximum<br>GDP<br>Year 
+-----------  ----------------  ------------------------  ----------------  ------------------------
+  Africa         1311.22                 1952                2560.93                 2007          
+ Americas        8528.04                 1952                21602.75                2007          
+   Asia           806.36                 1952                5432.37                 2007          
+  Europe         6096.66                 1952                25244.05                2007          
+  Oceania        10136.10                1952                32884.56                2007          
+
+---
 
 ## Task Option 3
 
@@ -102,7 +160,7 @@ Oceania      10039.6   14141.9   17983.3   18621.6   22214.1    34435.4
 
 ![](hw03_files/opt_3_output-1.png)<!-- -->
 
-
+---
 
 ## Task Option 6
 
