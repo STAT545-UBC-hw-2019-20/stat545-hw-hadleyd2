@@ -14,14 +14,12 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.path = "hw04_files/")
 
 ## Keep track of list of tables
-tab.cap = c('Table 1: Minimum and Maximum Country Level GDP per Capita by Continent and the corresponding countries and years',
-            'Table 2: Minimum and Maximum Continent Level GDP per Capita and the corresponding year',
-            'Table 3: Summary statistics for the Distribution of Country GDP per Capita by Continent',
-            'Table 4: Life expectancies (in years) using population-weighted means across all countries globally and within continents')
+tab.cap = c('Table 1: Life expectancies (years) for Canada and the United States',
+            'Table 2: Re-lengthened dataset for life expectancies for Canada and the United States',
+            'Table 3: Life expectancies (years) and GDP per capitas ($US-inflation adjusted) for China and India',
+            'Table 4: Re-lengthed dataset from Table 3')
 
-fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the United States',
-            'Figure 2: Jittered plot of country-level GDP per capita grouped by continent',
-            'Figure 3: Global life expectancy and continent-level life expectancies over time')
+fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the United States')
 ```
 
 ## Introduction
@@ -44,7 +42,7 @@ suppressPackageStartupMessages(library(DT)) #for datatable() command to display 
 
 Observations in the `gapminder::gapminder` dataset can be defined as country/year.  Thus, the dataset can be considered tidy since each row corresponds to one country/year observation.  In this section, we make a tibble with one row per year and columns for life expectancy for two or more countries.  The countries used are Canada and United States.
 
-```{r}
+```{r Q1.1}
 can.us <- gapminder %>% 
   #filter to Canada and United States
   filter(country == "Canada" | country == "United States") %>% 
@@ -55,14 +53,14 @@ can.us <- gapminder %>%
               names_from = country,
               values_from = lifeExp)
 
-datatable(can.us)
+datatable(can.us, caption=tab.cap[1])
 ```
 
 ### Scatterplot
 
 In this section, we use the new tibble `can.us` to produce a scatterplot of the life expectancy of Canada versus the life expectancy of the United States.  Note that since the column "United States" has a space in the middle, the code uses backticks, \`, so that the aesthetics are properly mapped.
 
-```{r lifeExp, fig.cap=fig.cap[1]}
+```{r Q1.2, fig.cap=fig.cap[1]}
 can.us %>% 
   ggplot(aes(Canada, `United States`)) +
   geom_point() +
@@ -73,14 +71,14 @@ can.us %>%
 
 In this step, the `can.us` tibble is re-lengthened.
 
-```{r}
+```{r Q1.3}
 can.us %>% 
   pivot_longer(cols = c("Canada",
                         "United States"),
                names_to = "country",
                values_to = "lifeExp") %>% 
   arrange(country) %>% 
-  datatable()
+  datatable(caption=tab.cap[2])
 ```
 
 ## Exercise 2 - Multivariate Option 1
@@ -89,7 +87,7 @@ can.us %>%
 
 In this section, we make a tibble with one row per year and columns for both life expectancy and GDP per capita for two unique countries.  The countries chosen are China and India.  Both life expectancy and GDP per capita are rounded to two decimal places.
 
-```{r}
+```{r Q2.1}
 ch.in <- gapminder %>% 
   filter(country == "China" |
            country == "India") %>% 
@@ -99,27 +97,27 @@ ch.in <- gapminder %>%
               values_from = c(lifeExp, gdpPercap)) %>% 
   mutate_at(vars(-year), ~round(., 2))
 
-datatable(ch.in)
+datatable(ch.in, caption=tab.cap[3])
 ```
 
 ### Re-lengthen
 
 In this section, we re-lengthen the data so that each row's observation is defined as the year/country intersection.  Since we have 2 countries and `r length(unique(ch.in$year))` years, the re-lengthened data has a total of `r 2*length(unique(ch.in$year))` rows instead of the `r nrow(ch.in)` rows as in the tibble from the previous section.
 
-```{r}
+```{r Q2.2}
 ch.in %>% 
   pivot_longer(cols = -year,
                names_to = c(".value", "country"),
                names_sep = "_") %>% 
-  datatable()
+  datatable(caption=tab.cap[4])
 ```
 As you can see from the above tibble, we've recreated the long-form data set that we originally started with!
 
 ## Exercise 3 - Table Joins
 
-Begin by reading in guest and email.
+We begin by reading int he made-up wedding guestlist and e-mail addresses using the code chunk below:
 
-```{r}
+```{r readin}
 guest <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/attend.csv")
 email <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/emails.csv")
 
