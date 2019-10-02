@@ -1,0 +1,154 @@
+---
+title: "Assignment 04"
+author: "Dan Hadley"
+date: '2019-10-08'
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.path = "hw04_files/")
+```
+
+Throughout this analysis, we use the `gapminder`, `tidyverse`, `tidyr` and `DT` packages.  The code to load these packages is not displayed in the report.
+
+```{r load packages, warning=FALSE, message=FALSE}
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(DT))
+```
+
+# Question 1
+## Univariate Option 1
+
+### Part 1
+We will make a tibble with one row per year, and columns for life expectancy for 2 countries, Canada and France.
+```{r}
+can_france <- gapminder %>% 
+  filter(country == "Canada" | 
+           country == "France") %>% 
+  select(country, year, lifeExp) %>% 
+  pivot_wider(id_cols = year,
+              names_from = country,
+              values_from = lifeExp) %>% 
+  rename(Canada_lifeExp = Canada, 
+         France_lifeExp = France)
+
+datatable(can_france)
+```
+### Part 2
+Next step, we will produce a scatterplot of the life expectancy of Canada versus the life expectancy of France! Note that I renamed the lifeExp columns so that it is more readable for the viewer. 
+
+```{r}
+can_france %>% 
+  ggplot(aes(Canada_lifeExp, France_lifeExp)) +
+  geom_point()
+```
+From this plot, we can see a direct relationship: As the LifeExp of Canada increases, so does the LifeExp of France!
+
+### Part 3
+In this step, we will now re-lengthen the data from above.
+
+```{r}
+can_france <- can_france %>% 
+  rename(Canada = Canada_lifeExp, 
+         France = France_lifeExp) %>% 
+  pivot_longer(cols = c("Canada",
+                        "France"),
+               names_to = "country",
+               values_to = "lifeExp")
+
+datatable(can_france)
+```
+
+# Question 2
+## Multivariate Option 1
+
+### Part 1
+In this part, we will make a tibble with one row per year, and columns for life expectancy AND GDP per capita for two countries, specifically China and Germany. This means that we will only have 1 row for each each, followed by columns for lifeExp of China, lifeExp of Germany, GDP for China, and GDP for France, for a total of 5 columns.
+
+```{r}
+china_germany <- gapminder %>% 
+  filter(country == "China" |
+           country == "Germany") %>% 
+  select(country, year, lifeExp, gdpPercap) %>% 
+  pivot_wider(id_cols = year,
+              names_from = country,
+              values_from = c(lifeExp, gdpPercap))
+
+datatable(china_germany)
+```
+
+### Part 2
+In this section, we will now re-lengthen the data!
+
+```{r}
+cg <- china_germany %>% 
+  pivot_longer(cols = -year,
+               names_to = c(".value", "country"),
+               names_sep = "_")
+
+datatable(cg)
+```
+As you can see from the above tibble, we've recreated the long-form data set that we originally started with!
+
+# Question 3
+## Table Joins
+
+Begin by reading in guest and email.
+
+```{r}
+g <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/attend.csv")
+e <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/emails.csv")
+
+```
+
+### 3.1 
+For each guest in the guestlist tibble, add a column for email address, which can be found in email tibble.
+
+First, separate the emails by row.
+```{r}
+sep_emails <- e %>% 
+  separate_rows(guest, sep = ", ")
+
+datatable(sep_emails)
+```
+
+```{r}
+joined_list <- g %>% 
+  rename(guest = "name") %>% 
+  left_join(sep_emails, by="guest")
+
+datatable(joined_list)
+```
+
+### 3.2
+We can move on to the next part: figuring out who we have emails for, but they're not yet on the guestlist. To do this, we will need to look at the email list, then compare and see who's not on the main guestlist.
+
+```{r}
+not_in_guestlist <- sep_emails %>%  
+  rename(name = "guest") %>% 
+  anti_join(g, by="name")
+
+datatable(not_in_guestlist)
+```
+
+As you can see, using the anti-join function allows us to produce all the people who are in the email data frame (i.e: they have an email), but are not included in g (i.e: the guestlist). 
+
+### 3.3 
+In this section, we will make a guestlist that includes everyone we have emails for (in addition to the onles in the original guestlist). To do this, we will simply join the table we made in 3.2 with the original guestlist table but appending them to the end. 
+
+```{r}
+j <- joined_list %>% 
+  rename(name = "guest") %>% 
+  bind_rows(not_in_guestlist)
+datatable(j)
+```
+
+The above guestlist contains everyone from the original guestlist, plus all the ones that we have emails for but were not in the original guestlist. Obviously, the new additions do not have information regarding their attendance. 
+
