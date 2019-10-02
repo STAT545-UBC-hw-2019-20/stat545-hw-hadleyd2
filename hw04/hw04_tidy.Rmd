@@ -115,7 +115,7 @@ As you can see from the above tibble, we've recreated the long-form data set tha
 
 ## Exercise 3 - Table Joins
 
-We begin by reading int he made-up wedding guestlist and e-mail addresses using the code chunk below:
+We begin by importing made-up wedding guestlist and e-mail addresses using the `read_csv()` function from the `readr` package which is automatically loaded with the `tidyverse` package.
 
 ```{r readin}
 guest <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/attend.csv")
@@ -123,8 +123,9 @@ email <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/maste
 
 ```
 
-### 3.1 
-For each guest in the guestlist tibble, add a column for email address, which can be found in email tibble.
+### Add E-mail Column
+
+For each guest in the guestlist, which is the tibble `guest`, we add a column for the e-mail address.
 
 First, separate the emails by row.
 ```{r}
@@ -142,8 +143,9 @@ joined_list <- guest %>%
 datatable(joined_list)
 ```
 
-### 3.2
-We can move on to the next part: figuring out who we have emails for, but they're not yet on the guestlist. To do this, we will need to look at the email list, then compare and see who's not on the main guestlist.
+### E-mails not on Guestlist
+
+In this section, we find e-mails in our e-mail list (tibble `email`) for persons not on the guestlist.
 
 ```{r}
 not_in_guestlist <- sep_emails %>%  
@@ -155,8 +157,8 @@ datatable(not_in_guestlist)
 
 As you can see, using the anti-join function allows us to produce all the people who are in the email data frame (i.e: they have an email), but are not included in g (i.e: the guestlist). 
 
-### 3.3 
-In this section, we will make a guestlist that includes everyone we have emails for (in addition to the onles in the original guestlist). To do this, we will simply join the table we made in 3.2 with the original guestlist table but appending them to the end. 
+### Expand Guestlist
+In this section, we make a guestlist that includes everyone on the original guestlist and everyone for whom we have emails. This is accomplished by joining the datasets `guest` and `not_in_guestlist` created in the previous section. 
 
 ```{r}
 guest.all <- joined_list %>% 
@@ -165,5 +167,4 @@ guest.all <- joined_list %>%
 datatable(guest.all)
 ```
 
-The above guestlist contains everyone from the original guestlist, plus all the ones that we have emails for but were not in the original guestlist. Obviously, the new additions do not have information regarding their attendance. 
 
