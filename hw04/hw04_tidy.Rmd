@@ -14,7 +14,13 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.path = "hw04_files/")
 ```
 
-Before beginning the analysis, we load the `gapminder`, `tidyverse`, `tidyr` and `DT` packages.  The code to load these packages is not displayed in the report.
+## Introduction
+
+For this analysis, we load the `gapminder`, `tidyverse`, `tidyr` and `DT` packages.  The code to load these packages is not displayed in the report.  Data wrangling is performed on the gapminder dataset.  In this report, I have chosen the following:
+
+  * [__Univariate Option 1__](#exercise-1---univariate-option-1) - Get the maximum and minimum of GDP per capita for all continents
+  * [__Multivariate Option 1__](#exercise-2---multivariate-option-1) - Look at the spread of GDP per capita within the continents
+  * [__Exercise 3__](#exercise-3---table-joins) - Find countries with interesting stories
 
 ```{r load packages, warning=FALSE, message=FALSE}
 suppressPackageStartupMessages(library(gapminder)) # for gapminder dataset
@@ -22,10 +28,10 @@ suppressPackageStartupMessages(library(tidyverse)) #loads ggplot2, tibble, tidyr
 suppressPackageStartupMessages(library(DT)) #for datatable() command to display datatables
 ```
 
-# Question 1
-## Univariate Option 1
+## Exercise 1 - Univariate Option 1
 
 ### Part 1
+
 We will make a tibble with one row per year, and columns for life expectancy for 2 countries, Canada and France.
 ```{r}
 can_france <- gapminder %>% 
@@ -40,7 +46,9 @@ can_france <- gapminder %>%
 
 datatable(can_france)
 ```
+
 ### Part 2
+
 Next step, we will produce a scatterplot of the life expectancy of Canada versus the life expectancy of France! Note that I renamed the lifeExp columns so that it is more readable for the viewer. 
 
 ```{r}
@@ -48,9 +56,11 @@ can_france %>%
   ggplot(aes(Canada_lifeExp, France_lifeExp)) +
   geom_point()
 ```
+
 From this plot, we can see a direct relationship: As the LifeExp of Canada increases, so does the LifeExp of France!
 
 ### Part 3
+
 In this step, we will now re-lengthen the data from above.
 
 ```{r}
@@ -65,10 +75,10 @@ can_france <- can_france %>%
 datatable(can_france)
 ```
 
-# Question 2
-## Multivariate Option 1
+## Exercise 2 - Multivariate Option 1
 
 ### Part 1
+
 In this part, we will make a tibble with one row per year, and columns for life expectancy AND GDP per capita for two countries, specifically China and Germany. This means that we will only have 1 row for each each, followed by columns for lifeExp of China, lifeExp of Germany, GDP for China, and GDP for France, for a total of 5 columns.
 
 ```{r}
@@ -96,8 +106,7 @@ datatable(cg)
 ```
 As you can see from the above tibble, we've recreated the long-form data set that we originally started with!
 
-# Question 3
-## Table Joins
+## Exercise 3 - Table Joins
 
 Begin by reading in guest and email.
 
