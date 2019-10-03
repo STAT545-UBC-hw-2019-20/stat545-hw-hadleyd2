@@ -13,9 +13,9 @@ Assignments are placed into folders titled hw01 - hw05.  Due dates for the assig
 | Assignment | Folder    | Due date :date: |           
 | :--: | ---- | :-------------: |
 | 1    | [hw01](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-hadleyd2/tree/master/hw01) | September 17, 2019 | 
-| 2    | hw02 | September 24, 2019 |
-| 3    | hw03 | October 01, 2019   |  
-| 4    | hw04 | October 08, 2019   |
+| 2    | [hw02](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-hadleyd2/tree/master/hw02) | September 24, 2019 |
+| 3    | [hw03](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-hadleyd2/tree/master/hw03) | October 01, 2019   |  
+| 4    | [hw04](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-hadleyd2/tree/master/hw04) | October 08, 2019   |
 | 5    | hw05 | October 18, 2019   |
 
 ---
