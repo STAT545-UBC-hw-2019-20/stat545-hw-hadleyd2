@@ -17,14 +17,18 @@ knitr::opts_chunk$set(echo = TRUE,
 tab.cap = c('Table 1: Life expectancies (years) for Canada and the United States',
             'Table 2: Re-lengthened dataset for life expectancies for Canada and the United States',
             'Table 3: Life expectancies (years) and GDP per capitas ($US-inflation adjusted) for China and India',
-            'Table 4: Re-lengthed dataset from Table 3')
+            'Table 4: Re-lengthed dataset from Table 3',
+            'Table 5: Guest list with e-mails where available',
+            'Table 6: Guests from the guest list with no e-mail available',
+            'Table 7: Names of people with e-mails available that are not on the guest list',
+            'Table 8: Combined tibble of all people either on the guest list or the e-mail list')
 
 fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the United States')
 ```
 
 ## Introduction
 
-For this analysis, we load the `gapminder`, `tidyverse`, `tidyr` and `DT` packages.  The code to load these packages is not displayed in the report.  Data wrangling is performed on the gapminder dataset.  In this report, I have chosen the following:
+For this analysis, we load the `gapminder`, `tidyverse`, `knitrr` and `DT` packages.  The code to load these packages is not displayed in the report.  Data wrangling is performed on the gapminder dataset.  In this report, I have chosen the following:
 
   * [__Univariate Option 1__](#exercise-1---univariate-option-1) - Using the gapminder dataset, we make a new tibble with one row per year and two columns containing the life expectancies for two countries, use this new tibble to make a scatterplot of the life expectancies, and then re-lengthen the data.
   * [__Multivariate Option 1__](#exercise-2---multivariate-option-1) - Using the gapminder dataset, we make a tibble with one row per year and columns for both life expectancies and GDP per capita for two countries and then re-lengthen the data.
@@ -34,6 +38,7 @@ For this analysis, we load the `gapminder`, `tidyverse`, `tidyr` and `DT` packag
 suppressPackageStartupMessages(library(gapminder)) # for gapminder dataset
 suppressPackageStartupMessages(library(tidyverse)) #loads ggplot2, tibble, tidyr, dplyr packages
 suppressPackageStartupMessages(library(DT)) #for datatable() command to display datatables
+suppressPackageStartupMessages(library(knitr)) #for kable() command
 ```
 
 ## Exercise 1 - Univariate Option 1
@@ -117,53 +122,47 @@ As you can see from the above tibble, we've recreated the long-form data set tha
 
 We begin by importing made-up wedding guestlist and e-mail addresses using the `read_csv()` function from the `readr` package which is automatically loaded with the `tidyverse` package.
 
-```{r read-in}
+```{r read-in, message=FALSE}
 guest <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/attend.csv")
 email <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/emails.csv")
 ```
 
-### Add E-mail Column
+### 3.1 - Add E-mail Column
 
-For each guest in the guestlist (tibble `guest`), we add a column for the e-mail address.
+For each guest in the guestlist (tibble `guest`), we add a column for the e-mail address.  We do this by first separating rows by `, `, since the names of all guests from the same party are on the same line separated by a comma in the `email` tibble.  The `separate_rows()` function is designed for this specific purpose. Once we modify the `email` tibble in this way, we can compare it to `guest` tibble using the `right_join()` function.
 
 
-```{r}
-sep_emails <- email %>% 
-  separate_rows(guest, sep = ", ")
+```{r Q3.1}
+#First separate rows in email tibble to get one guest per row
+guest.email <- email %>% 
+  separate_rows(guest, sep = ", ") %>% 
+  right_join(guest, by=c("guest" = "name"))
 
-datatable(sep_emails)
+datatable(guest.email, caption=tab.cap[5])
 ```
 
-```{r}
-joined_list <- guest %>% 
-  rename(guest = "name") %>% 
-  left_join(sep_emails, by="guest")
+We see that there are `r summarize(guest.email, sum(is.na(email)))` guests that do not have an e-mail address in the `email` tibble.  These guests are `r filter(guest.email, is.na(email)) %>% select(guest) %>% kable(caption=tab.cap[6])`
 
-datatable(joined_list)
+### 3.2 - E-mails not on Guestlist
+
+In this section, we find e-mails in our e-mail list (tibble `email`) for persons not on the guestlist.  This is similar to Exercise 3.1, but instead of using the `left_join()` or `right_join()` functions, we use `anti_join()`, which returns all rows from a tibble that do not match values in another tibble.
+
+```{r}
+email.only <- email %>%
+  separate_rows(guest, sep=", ") %>% 
+  anti_join(guest, by=c("guest" = "name"))
+
+datatable(email.only, caption=tab.cap[7])
 ```
 
-### E-mails not on Guestlist
 
-In this section, we find e-mails in our e-mail list (tibble `email`) for persons not on the guestlist.
-
-```{r}
-not_in_guestlist <- sep_emails %>%  
-  rename(name = "guest") %>% 
-  anti_join(guest, by="name")
-
-datatable(not_in_guestlist)
-```
-
-As you can see, using the anti-join function allows us to produce all the people who are in the email data frame (i.e: they have an email), but are not included in g (i.e: the guestlist). 
-
-### Expand Guestlist
-In this section, we make a guestlist that includes everyone on the original guestlist and everyone for whom we have emails. This is accomplished by joining the datasets `guest` and `not_in_guestlist` created in the previous section. 
+### 3.3 - Expand Guestlist
+In this section, we combine the guest list with the e-mail list so that each name appears exactly once in a new tibble.
 
 ```{r}
-guest.all <- joined_list %>% 
-  rename(name = "guest") %>% 
-  bind_rows(not_in_guestlist)
-datatable(guest.all)
+guest.email %>%
+  bind_rows(email.only) %>% 
+datatable(caption=tab.cap[8])
 ```
 
 
