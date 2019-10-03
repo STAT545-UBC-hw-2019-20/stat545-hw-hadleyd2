@@ -117,17 +117,16 @@ As you can see from the above tibble, we've recreated the long-form data set tha
 
 We begin by importing made-up wedding guestlist and e-mail addresses using the `read_csv()` function from the `readr` package which is automatically loaded with the `tidyverse` package.
 
-```{r readin}
+```{r read-in}
 guest <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/attend.csv")
 email <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/emails.csv")
-
 ```
 
 ### Add E-mail Column
 
-For each guest in the guestlist, which is the tibble `guest`, we add a column for the e-mail address.
+For each guest in the guestlist (tibble `guest`), we add a column for the e-mail address.
 
-First, separate the emails by row.
+
 ```{r}
 sep_emails <- email %>% 
   separate_rows(guest, sep = ", ")
