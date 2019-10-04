@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE,
 
 ## Keep track of list of tables
 tab.cap = c('Table 1: Life expectancies (years) for Canada and the United States',
-            'Table 2: Re-lengthened dataset for life expectancies for Canada and the United States',
+            'Table 2: Re-lengthened dataset of life expectancies for Canada and the United States',
             'Table 3: Life expectancies (years) and GDP per capitas ($US-inflation adjusted) for China and India',
             'Table 4: Re-lengthed dataset from Table 3',
             'Table 5: Guest list with e-mails where available',
@@ -23,7 +23,7 @@ tab.cap = c('Table 1: Life expectancies (years) for Canada and the United States
             'Table 7: Names of people with e-mails available that are not on the guest list',
             'Table 8: Combined tibble of all people either on the guest list or the e-mail list')
 
-fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the United States')
+fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the United States with larger points for more recent observations')
 ```
 
 ## Introduction
@@ -53,41 +53,37 @@ suppressPackageStartupMessages(library(knitr)) #for kable() command
 
 ### Make a Tibble
 
-Observations in the `gapminder::gapminder` dataset can be defined as country/year.  Thus, the dataset can be considered tidy since each row corresponds to one country/year observation.  In this section, we make a tibble with one row per year and columns for life expectancy for two or more countries.  The countries used are Canada and United States.
+Observations in the `gapminder::gapminder` dataset can be defined as country/year.  Thus, the dataset can be considered tidy since each row corresponds to one country/year observation.  In this section, we make a tibble with one row per year and columns for life expectancy for Canada and United States.  The data is presented in Table 1.
 
 ```{r Q1.1}
 can.us <- gapminder %>% 
-  #filter to Canada and United States
-  filter(country == "Canada" | country == "United States") %>% 
-  #select year, country, and life expectancy columns
-  select(year, country, lifeExp) %>% 
-  # Transform tibble with year, country, and lifeExp columns to year, Canada and United States with life expectancies
-  pivot_wider(id_cols = year,
-              names_from = country,
-              values_from = lifeExp)
+  filter(country == "Canada" | country == "United States") %>% #filter by country
+  select(year, country, lifeExp) %>% #select columns of interest
+  pivot_wider(id_cols = year, #observations
+              names_from = country, #new column names
+              values_from = lifeExp) #new column values
 
 datatable(can.us, caption=tab.cap[1])
 ```
 
 ### Scatterplot
 
-In this section, we use the new tibble `can.us` to produce a scatterplot of the life expectancy of Canada versus the life expectancy of the United States.  Note that since the column "United States" has a space in the middle, the code uses backticks, \`, so that the aesthetics are properly mapped.
+In this section, we use the new tibble `can.us` to produce a scatterplot of the life expectancy of Canada versus the life expectancy of the United States.  Note that since the column name "United States" has a space, the code uses backticks, \`United States\`, so that the aesthetics are properly mapped.
 
 ```{r Q1.2, fig.cap=fig.cap[1]}
 can.us %>% 
   ggplot(aes(Canada, `United States`)) +
-  geom_point() +
-  ggtitle(label='Life Expectancies (years)')
+  geom_point(shape=1, aes(size=year)) +
+  ggtitle(label='Scatterplot of Life Expectancies (years) for Two Countries')
 ```
 
 ### Re-lengthen 
 
-In this step, the `can.us` tibble is re-lengthened.
+The `can.us` tibble is re-lengthened so that observations are year/country combinations and presented as Table 2.
 
 ```{r Q1.3}
 can.us %>% 
-  pivot_longer(cols = c("Canada",
-                        "United States"),
+  pivot_longer(cols = c("Canada", "United States"),
                names_to = "country",
                values_to = "lifeExp") %>% 
   arrange(country) %>% 
@@ -98,33 +94,32 @@ can.us %>%
 
 ### Make a Tibble
 
-In this section, we make a tibble with one row per year and columns for both life expectancy and GDP per capita for two unique countries.  The countries chosen are China and India.  Both life expectancy and GDP per capita are rounded to two decimal places.
+In this section, we make a tibble with one row per year and columns for both life expectancy and GDP per capita for two countries, China and India and presented in Table 3.  Separating the data and country by underscore in the column names leads to easier re-lengthening in the next section.
 
 ```{r Q2.1}
 ch.in <- gapminder %>% 
-  filter(country == "China" |
-           country == "India") %>% 
-  select(country, year, lifeExp, gdpPercap) %>% 
+  filter(country == "China" | country == "India") %>% #filter by country
+  select(country, year, lifeExp, gdpPercap) %>% #columns of interest
   pivot_wider(id_cols = year,
               names_from = country,
               values_from = c(lifeExp, gdpPercap)) %>% 
-  mutate_at(vars(-year), ~round(., 2))
+  mutate_at(vars(-year), ~round(., 2)) #round numeric data
 
 datatable(ch.in, caption=tab.cap[3])
 ```
 
 ### Re-lengthen
 
-In this section, we re-lengthen the data so that each row's observation is defined as the year/country intersection.  Since we have 2 countries and `r length(unique(ch.in$year))` years, the re-lengthened data has a total of `r 2*length(unique(ch.in$year))` rows instead of the `r nrow(ch.in)` rows as in the tibble from the previous section.
+In this section, we re-lengthen the data so that an observation is defined as a year/country intersection.  The data is presented in Table 4.  Since we have 2 countries and `r length(unique(ch.in$year))` years, Table 4 has `r 2*length(unique(ch.in$year))` rows instead of the `r nrow(ch.in)` rows of Table 3.
 
 ```{r Q2.2}
 ch.in %>% 
   pivot_longer(cols = -year,
                names_to = c(".value", "country"),
                names_sep = "_") %>% 
+  arrange(country) %>% 
   datatable(caption=tab.cap[4])
 ```
-As you can see from the above tibble, we've recreated the long-form data set that we originally started with!
 
 ## Exercise 3 - Table Joins
 
@@ -137,14 +132,13 @@ email <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/maste
 
 ### 3.1 - Add E-mail Column
 
-For each guest in the guestlist (tibble `guest`), we add a column for the e-mail address.  We do this by first separating rows by `, `, since the names of all guests from the same party are on the same line separated by a comma in the `email` tibble.  The `separate_rows()` function is designed for this specific purpose. Once we modify the `email` tibble in this way, we can compare it to `guest` tibble using the `right_join()` function.
-
+For each guest in the guestlist (tibble `guest`), we add a column for the e-mail address.  The `separate_rows()` function is easy to use here due to the formatting of the names in the "guest" column of the `email` tibble. Then, we can compare separated rows to the `guest` tibble using the `right_join()` function.  The results are presented in Table 5.
 
 ```{r Q3.1}
 #First separate rows in email tibble to get one guest per row
 guest.email <- email %>% 
-  separate_rows(guest, sep = ", ") %>% 
-  right_join(guest, by=c("guest" = "name"))
+  separate_rows(guest, sep = ", ") %>% #create row per guest name
+  right_join(guest, by=c("guest" = "name")) #adds emails to guest tibble
 
 datatable(guest.email, caption=tab.cap[5])
 ```
@@ -153,12 +147,12 @@ We see that there are `r summarize(guest.email, sum(is.na(email)))` guests that 
 
 ### 3.2 - E-mails not on Guestlist
 
-In this section, we find e-mails in our e-mail list (tibble `email`) for persons not on the guestlist.  This is similar to Exercise 3.1, but instead of using the `left_join()` or `right_join()` functions, we use `anti_join()`, which returns all rows from a tibble that do not match values in another tibble.
+In this section, we find e-mails in the `email` tibble for persons not on the guestlist.  Using `anti_join()`, this list is created and presented in Table 7.
 
 ```{r}
 email.only <- email %>%
-  separate_rows(guest, sep=", ") %>% 
-  anti_join(guest, by=c("guest" = "name"))
+  separate_rows(guest, sep=", ") %>% #create one row per person in email tibble
+  anti_join(guest, by=c("guest" = "name")) #compare email$guest to guest$name
 
 datatable(email.only, caption=tab.cap[7])
 ```
