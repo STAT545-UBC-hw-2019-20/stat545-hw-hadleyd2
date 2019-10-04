@@ -30,9 +30,17 @@ fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the U
 
 For this analysis, we load the `gapminder`, `tidyverse`, `knitrr` and `DT` packages.  The code to load these packages is not displayed in the report.  Data wrangling is performed on the gapminder dataset.  In this report, I have chosen the following:
 
-  * [__Univariate Option 1__](#exercise-1---univariate-option-1) - Using the gapminder dataset, we make a new tibble with one row per year and two columns containing the life expectancies for two countries, use this new tibble to make a scatterplot of the life expectancies, and then re-lengthen the data.
-  * [__Multivariate Option 1__](#exercise-2---multivariate-option-1) - Using the gapminder dataset, we make a tibble with one row per year and columns for both life expectancies and GDP per capita for two countries and then re-lengthen the data.
-  * [__Exercise 3__](#exercise-3---table-joins) - 
+  * [__Univariate Option 1__](#exercise-1---univariate-option-1):
+    - Make a new tibble with one row per year, and columns for the life expectancy for two countries
+    - Take advantage of this new data shape to scatterplot life expectancy for one country against that of another
+    - Re-lengthen the data
+  * [__Multivariate Option 1__](#exercise-2---multivariate-option-1):
+    - Make a tibble with one row per year and columns for both life expectancies and GDP per capita for two countries
+    - Re-lengthen the data
+  * [__Exercise 3__](#exercise-3---table-joins):
+    - For each guest in the guestlist (`guest` tibble), add a column for email address which can be found in the `email` tibble
+    - Who do we have emails for, yet are not on the guestlist
+    - Make a guest list that includes everyone we have emails for (in addition to those on the original guestlist)
 
 ```{r load packages, warning=FALSE, message=FALSE}
 suppressPackageStartupMessages(library(gapminder)) # for gapminder dataset
