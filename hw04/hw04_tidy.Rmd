@@ -38,7 +38,7 @@ For this analysis, we load the `gapminder`, `tidyverse`, `knitrr` and `DT` packa
     - Make a tibble with one row per year and columns for both life expectancies and GDP per capita for two countries
     - Re-lengthen the data
   * [__Exercise 3__](#exercise-3---table-joins):
-    - For each guest in the guestlist (`guest` tibble), add a column for email address which can be found in the `email` tibble
+    - For each guest in the `guest` tibble, add a column for email address which can be found in the `email` tibble
     - Who do we have emails for, yet are not on the guestlist
     - Make a guest list that includes everyone we have emails for (in addition to those on the original guestlist)
 
