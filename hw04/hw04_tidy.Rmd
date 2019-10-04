@@ -42,7 +42,7 @@ For this analysis, we load the `gapminder`, `tidyverse`, `knitrr` and `DT` packa
     - Who do we have emails for, yet are not on the guestlist
     - Make a guest list that includes everyone we have emails for (in addition to those on the original guestlist)
 
-```{r load packages, warning=FALSE, message=FALSE}
+```{r load packages, warning=FALSE, message=FALSE, echo=FALSE}
 suppressPackageStartupMessages(library(gapminder)) # for gapminder dataset
 suppressPackageStartupMessages(library(tidyverse)) #loads ggplot2, tibble, tidyr, dplyr packages
 suppressPackageStartupMessages(library(DT)) #for datatable() command to display datatables
