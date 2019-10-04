@@ -1,5 +1,5 @@
-# STAT 545A: Assignemnt 03
-This repository holds files for [Assignment 3](https://stat545.stat.ubc.ca/evaluation/hw03/hw03/).
+# STAT 545A: Assignment 03
+This directory holds files for [Assignment 3](https://stat545.stat.ubc.ca/evaluation/hw03/hw03/).
 
 ## For Peer Reviewers and TAs
 
