@@ -1,13 +1,31 @@
 ---
-title: "hw05"
-author: "Daniel Hadley"
+title: "Assignment 05"
+author: "Dan Hadley"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
   html_document:
+    css: custom.css
   keep_md: true
   toc: true
   toc_float: true
----    
+---   
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.path = "hw05_files/")
+
+## Keep track of list of tables
+tab.cap = c('Table 1: Summary of number of observations and levels for the original gapminder dataset, the removal of "Oceania" observations, and dropping the "Oceania" factor level',
+            'Table 2: Re-lengthened dataset of life expectancies for Canada and the United States',
+            'Table 3: Life expectancies (years) and GDP per capitas ($US-inflation adjusted) for China and India',
+            'Table 4: Re-lengthed dataset from Table 3',
+            'Table 5: Guest list with e-mails where available',
+            'Table 6: Guests from the guest list with no e-mail available',
+            'Table 7: Names of people with e-mails available that are not on the guest list',
+            'Table 8: Combined tibble of all people either on the guest list or the e-mail list')
+
+fig.cap = c('Figure 1: Scatterplot of life expectancies between Canada and the United States with larger points for more recent observations')
+```
   
 ```{r packages, warning=FALSE, echo=FALSE, message=F}
 suppressPackageStartupMessages(library(tidyverse)) #loads ggplot2, tibble, tidyr, dplyr packages
@@ -20,7 +38,13 @@ suppressPackageStartupMessages(library(gridExtra)) #arrange figures side-by-side
 
 ## Introduction
 
-The following section headers come directly from [Assignment 5](https://stat545.stat.ubc.ca/evaluation/hw05/hw05/).  Instructions for each section are given in italics directly below the header.
+The following section headers come directly from [Assignment 5](https://stat545.stat.ubc.ca/evaluation/hw05/hw05/).  Instructions for each section are given in italics directly below the header as blockquotes.  Note that I have overriden the default size of blockquotes via my `custom.css` file.  Instructions for doing this are taken from [here](https://stackoverflow.com/questions/44191576/how-to-control-the-font-size-of-quoted-text-in-markdown).
+
+---
+
+<br>
+
+---
   
 ## Exercise 1: Explain the value of the here::here package
   
@@ -40,8 +64,11 @@ The `here` package takes advantage of the second bullet point by offering a simp
   - gives precedence to a project's directory over a working directory,
   - still allows code to run even when files are moved.
 
+---
 
-<br><br>
+<br>
+
+---
   
 ## Exercise 2: Factor management
   
@@ -53,35 +80,48 @@ I work with the `gapminder` dataset and the continent variable, which is set as 
 str(gapminder$continent)
 ```
   
-> *1. Drop Oceania. Filter the Gapminder data to remove observations associated with the continent of Oceania. Additionally, remove unused factor levels. Provide concrete information on the data before and after removing these rows and Oceania; address the number of rows and the levels of the affected factors.*
+> *1. Drop Oceania. Filter the Gapminder data to remove observations associated with the `continent` of Oceania. Additionally, remove unused factor levels. Provide concrete information on the data before and after removing these rows and Oceania; address the number of rows and the levels of the affected factors.*
+
+Table 1 below contains the summarized results.
   
-First, the newdata was created as instructed above:
+Removing observations associated with values in a column is easily done via the `dplyr::filter()` command.  We create a new tibble called `noOc` which filters all observations with `continent=="Oceania"` from gapminder.
 ```{r}
-newdata <- gapminder %>% 
-  filter(continent!='Oceania') %>% 
+noOc <- gapminder %>% 
+  filter(continent != 'Oceania')
+```
+
+The number of rows in the `noOc` dataset is `r nrow(noOc)`, as compared to `gapminder` which has `r nrow(gapminder)` rows.  The `continent` column from `gapminder` has `r nlevels(gapminder$continent)` while `noOc` has `r nlevels(noOc$continent)` levels.  The levels of the `continent` factor for both `gapminder` and `noOc` are the same:
+
+```{r levels1}
+levels(gapminder$continent)
+levels(noOc$continent)
+```
+
+We know that "Oceania" is a factor level not included in the data of `noOc`.  To remove it, we use the `droplevels()` command to create a new data frame called `noOc.drop` with the "Oceania" level removed.
+```{r drop}
+noOc.drop <- noOc %>% 
   droplevels()
+
+levels(noOc.drop$continent)
 ```
 
-Then, the new data were compared against the original data in terms of data size, and continent:
-```{r}
-sprintf("gapminder has %s observations while newdata has %s observations.",
-        dim(gapminder)[1], dim(newdata)[1])
+Note that dropping levels does not change the number of observations.  The number of rows in `noOc` is `r nrow(noOc)` and the number of rows in `noOc.drop` is `r nrow(noOc.drop)`.
 
-sprintf("gapminder's continent has %s levels: %s", 
-        nlevels(gapminder$continent), 
-        paste(levels(gapminder$continent),collapse=', '))
+In summary, 
 
-sprintf("newdata's continent has %s levels: %s.", 
-        nlevels(newdata$continent),  
-        paste(levels(newdata$continent),collapse=', ')  )
-```
+Dataset | **`gapminder`** | **`noOc`** | **`noOc.drop`** |
+--------|-------------|--------|-------------|
+Number of Rows | `r nrow(gapminder)` | `r nrow(noOc)` | `r nrow(noOc.drop)` |
+Number of Levels | `r nlevels(gapminder$continent)` | `r nlevels(noOc$continent)` | `r nlevels(noOc.drop$continent)` |
+Levels | `r paste(levels(gapminder$continent), collapse=', ')` | `r paste(levels(noOc$continent), collapse=', ')` | `r paste(levels(noOc.drop$continent), collapse=', ')` |
+Table: `r tab.cap[1]`
 
 
 > *2. Reorder the levels of country or continent. Use the forcats package to change the order of the factor levels, based on summarized information of one of the quantitative variables. Consider experimenting with a summary statistic beyond the most basic choice of the mean/median. Use the forcats package in the tidyverse for this, rather than the baseR function as.factor.* 
   
 Continent was reordered by maximum value of gdpPercap, and the reordered variable was defined as cont.new.  
 ```{r}
-gapminder$continent.newm <- with(gapminder, fct_reorder(continent, gdpPercap, max))
+gapminder$cont.new <- with(gapminder, fct_reorder(continent, gdpPercap, max))
 ```
 
 
@@ -91,19 +131,21 @@ sprintf("Order of continent: %s.",
         paste(levels(gapminder$continent),collapse=', '))
 
 sprintf("Order of continent.new: %s.", 
-        paste(levels(gapminder$continent.new), collapse=', '))
+        paste(levels(gapminder$cont.new), collapse=', '))
 ```
 
 Also, a figure of before/after re-leveling the factor visually show that the order of the factor variable has changed.
 
 ```{r, figure.width=17, figure.height=2, exercise2}
-p1<-gapminder%>% ggplot(aes(continent, gdpPercap)) + 
-  geom_point()+
+p1 <- gapminder%>% ggplot(aes(continent, gdpPercap)) + 
+  geom_point() +
   labs(title='Before', subtitle='(i.e. continent in original order)')
-p2<-gapminder%>% ggplot(aes(continent.new, gdpPercap)) + 
-  geom_point()+
-  labs(title='After', subtitle="(i.e. continent in order of max(gdpPercap))", y='')+
+
+p2 <- gapminder%>% ggplot(aes(cont.new, gdpPercap)) + 
+  geom_point() +
+  labs(title='After', subtitle="(i.e. continent in order of max(gdpPercap))", y='') +
   scale_y_continuous(breaks=NULL, labels=NULL)
+
 grid.arrange(p1, p2, nrow=1)
 ```
 
@@ -123,7 +165,7 @@ The *after* plot below showed continent.new was properly ordered such that Afric
   
 gapminder file was exported as gapminder.csv using `write_csv()` and was read back into R using `read_csv()` and `here::here()`.
 ```{r}
-write_csv(gapminder,here::here("./hw05/gapminder4hw.csv"))
+write_csv(gapminder, here::here("./hw05/gapminder4hw.csv"))
 gapminder4hw<-read_csv(here::here("./hw05/gapminder4hw.csv"))
 ```
 
@@ -150,8 +192,10 @@ gapminder4hw %>% filter(country.new%in%levels(country.new)[1:50]) %>% ggplot(aes
 The gapminder was properly exported and imported as back as every entry was the same as shown below.  A newly defined variable after importing back the data (i.e. country.new) had to be excluded for this comparision.
 
 ```{r}
-gapminder4hw<-gapminder4hw %>% select(-country.new)
-table(gapminder==gapminder4hw)
+gapminder4hw <- gapminder4hw %>% 
+  select(-country.new)
+
+table(gapminder == gapminder4hw)
 ```
 
 <br/><br/>
