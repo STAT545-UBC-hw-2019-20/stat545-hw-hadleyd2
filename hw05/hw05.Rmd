@@ -1,0 +1,168 @@
+---
+title: "hw05"
+author: "Daniel Hadley"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: 
+  html_document:
+  keep_md: true
+  toc: true
+  toc_float: true
+---    
+  
+```{r packages, warning=FALSE, echo=FALSE, message=F}
+suppressPackageStartupMessages(library(tidyverse)) #loads ggplot2, tibble, tidyr, dplyr packages
+suppressPackageStartupMessages(library(gapminder)) #for gapminder dataset
+suppressPackageStartupMessages(library(datasets))
+suppressPackageStartupMessages(library(DT)) #for datatable() to display datatables
+suppressPackageStartupMessages(library(knitr)) #for kable()
+suppressPackageStartupMessages(library(gridExtra)) #arrange figures side-by-side
+```
+
+## Introduction
+
+The following section headers come directly from [Assignment 5](https://stat545.stat.ubc.ca/evaluation/hw05/hw05/).  Instructions for each section are given in italics directly below the header.
+  
+## Exercise 1: Explain the value of the here::here package
+  
+> *Read through the [blog post](https://malco.io/2018/11/05/why-should-i-use-the-here-package-when-i-m-already-using-projects/) by Malcolm Barrett where he outlines why one should use the here::here package in RStudio projects.*
+>
+> *Task: * ***In your own words****, summarize the value of the here::here package in 250 words or fewer.*
+
+To explain the usefulness of the `here` package, we first must introduce the idea of `R` projects.  Benefits of using `R` projects are:
+
+  - Divide work into specific projects
+  - Uses the project's directory as the working directory
+  - Can be set to open a fresh `R` session with an empty global environment and no packages loaded
+
+The `here` package takes advantage of the second bullet point by offering a simple set of functions that detects the project's root directory and works with paths within that directory in a platform-independent way so that the `R` code is not affected by the user's operating system.  Additionally, `here`
+
+  - works when `*.R` files are open in a session outside of a project,
+  - gives precedence to a project's directory over a working directory,
+  - still allows code to run even when files are moved.
+
+
+<br><br>
+  
+## Exercise 2: Factor management
+  
+> *Task: Choose one dataset (of your choice) and a variable to explore.*
+  
+I work with the `gapminder` dataset and the continent variable, which is set as a factor.
+
+```{r cont-factor}
+str(gapminder$continent)
+```
+  
+> *1. Drop Oceania. Filter the Gapminder data to remove observations associated with the continent of Oceania. Additionally, remove unused factor levels. Provide concrete information on the data before and after removing these rows and Oceania; address the number of rows and the levels of the affected factors.*
+  
+First, the newdata was created as instructed above:
+```{r}
+newdata <- gapminder %>% 
+  filter(continent!='Oceania') %>% 
+  droplevels()
+```
+
+Then, the new data were compared against the original data in terms of data size, and continent:
+```{r}
+sprintf("gapminder has %s observations while newdata has %s observations.",
+        dim(gapminder)[1], dim(newdata)[1])
+
+sprintf("gapminder's continent has %s levels: %s", 
+        nlevels(gapminder$continent), 
+        paste(levels(gapminder$continent),collapse=', '))
+
+sprintf("newdata's continent has %s levels: %s.", 
+        nlevels(newdata$continent),  
+        paste(levels(newdata$continent),collapse=', ')  )
+```
+
+
+> *2. Reorder the levels of country or continent. Use the forcats package to change the order of the factor levels, based on summarized information of one of the quantitative variables. Consider experimenting with a summary statistic beyond the most basic choice of the mean/median. Use the forcats package in the tidyverse for this, rather than the baseR function as.factor.* 
+  
+Continent was reordered by maximum value of gdpPercap, and the reordered variable was defined as cont.new.  
+```{r}
+gapminder$continent.newm <- with(gapminder, fct_reorder(continent, gdpPercap, max))
+```
+
+
+By using `levels` function, one can tell the order of continent.new has changed and was different from that of continent:
+```{r}
+sprintf("Order of continent: %s.", 
+        paste(levels(gapminder$continent),collapse=', '))
+
+sprintf("Order of continent.new: %s.", 
+        paste(levels(gapminder$continent.new), collapse=', '))
+```
+
+Also, a figure of before/after re-leveling the factor visually show that the order of the factor variable has changed.
+
+```{r, figure.width=17, figure.height=2, exercise2}
+p1<-gapminder%>% ggplot(aes(continent, gdpPercap)) + 
+  geom_point()+
+  labs(title='Before', subtitle='(i.e. continent in original order)')
+p2<-gapminder%>% ggplot(aes(continent.new, gdpPercap)) + 
+  geom_point()+
+  labs(title='After', subtitle="(i.e. continent in order of max(gdpPercap))", y='')+
+  scale_y_continuous(breaks=NULL, labels=NULL)
+grid.arrange(p1, p2, nrow=1)
+```
+
+The *after* plot below showed continent.new was properly ordered such that Africa which had the lowest gdpPercap was on the far left, followed by Oceania and so on.
+
+
+<br/><br/>
+  
+## Exercise 3: File input/output (I/O) 
+  **Task: Experiment with at least one of:**
+  
+  - **write_csv()/read_csv() (and/or TSV friends) **
+  - **saveRDS()/readRDS()**
+  - **dput()/dget()**
+  
+  **You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use here::here() for reading in and writing out.**
+  
+gapminder file was exported as gapminder.csv using `write_csv()` and was read back into R using `read_csv()` and `here::here()`.
+```{r}
+write_csv(gapminder,here::here("./hw05/gapminder4hw.csv"))
+gapminder4hw<-read_csv(here::here("./hw05/gapminder4hw.csv"))
+```
+
+  
+  **With the imported data, play around with factor levels and use factors to order your data with one of your factors (i.e. non-alphabetically). For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.**
+  
+This time, country was reordered by its minimum pop value, and a new variable country.new was created.
+```{r}
+gapminder4hw$country.new<-with(gapminder, fct_reorder(country, pop, min))
+```
+
+  
+To see if country.new has proper factor level, a plot was created below. Note that given 142 countries, the first 50 countries were selected for the plot for readability.  The countries were ordered in the ascending order of their mininum population value.
+
+
+```{r, exercise3}
+gapminder4hw %>% filter(country.new%in%levels(country.new)[1:50]) %>% ggplot(aes(country.new, pop, group=year))+
+  geom_point()+
+  scale_y_log10(labels=scales::comma) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+  
+The gapminder was properly exported and imported as back as every entry was the same as shown below.  A newly defined variable after importing back the data (i.e. country.new) had to be excluded for this comparision.
+
+```{r}
+gapminder4hw<-gapminder4hw %>% select(-country.new)
+table(gapminder==gapminder4hw)
+```
+
+<br/><br/>
+  
+## Exercise 4: Visualization design
+  **Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.**
+  
+  **Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.**
+  
+  <br/><br/>
+  
+## Exercise 5: Writing figures to file
+  
+  **Task: Use ggsave() to explicitly save a plot to file. Include the exported plot as part of your repository and assignment.**
