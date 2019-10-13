@@ -160,16 +160,34 @@ levels(gap.growth$continent)
 ## Exercise 3: File input/output (I/O) 
   **Task: Experiment with at least one of:**
   
-  - **write_csv()/read_csv() (and/or TSV friends) **
-  - **saveRDS()/readRDS()**
-  - **dput()/dget()**
+  - **write_csv()/read_csv() (and/or TSV friends)**,
+  - **saveRDS()/readRDS()**,
+  - **dput()/dget()**.
   
-  **You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use here::here() for reading in and writing out.**
+  **You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use `here::here()` for reading in and writing out.**
   
-gapminder file was exported as gapminder.csv using `write_csv()` and was read back into R using `read_csv()` and `here::here()`.
-```{r}
-write_csv(gapminder, here::here("./hw05/gapminder4hw.csv"))
-gapminder4hw <- read_csv(here::here("./hw05/gapminder4hw.csv"))
+Using the gapminder dataset, we calculate the population-weighted moving average life expectancy for each country from `r min(gapminder$year)` to the observation's year.  We then export the country, continent, year, and moving average life expectancy from gapminder to `gap-hw5.csv` using the `readr::write_csv()` function.  The data is imported back into our `R` session via the `readr::read_csv()` function.  The file path is designated by the `here::here()` function.  It should be noted that the `readr` package is automatically loaded with the `tidyverse` package.
+```{r read-write}
+# Population-weighted moving average function
+w.avg <- function(x, w, t) {
+  #x is the data to be averaged
+  #w is the data by which to weight
+  #t is the time column by which we roll the weighted mean
+  weighted.mean(x=x, w=w)
+}
+#Create new column
+gapminder %>% 
+  group_by(country) %>% 
+  summarize(year)
+  # mutate(wavg.lifeExp = weighted.mean(lifeExp[gapminder$year <= year], pop[gapminder$year <= year])) %>% 
+  # filter(year, country, continent, wavg.lifeExp)
+  
+# #working directory is project's directory
+# file.name <- here::here("hw05", "hw05_files", "gap-hw5.csv")
+# 
+# #export csv to disc
+# write_csv(gapminder, file.name)
+# gapminder4hw <- read_csv(file.name)
 ```
 
   
