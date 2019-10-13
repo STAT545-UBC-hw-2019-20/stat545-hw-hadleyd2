@@ -270,12 +270,16 @@ gap.hw5 %>%
 ---
   
 ## Exercise 4: Visualization design
-  **Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.**
+>**Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.**
   
-  **Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.**
+>**Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.**
   
-  <br/><br/>
+---
+
+<br>
+
+---
   
 ## Exercise 5: Writing figures to file
   
-  **Task: Use ggsave() to explicitly save a plot to file. Include the exported plot as part of your repository and assignment.**
+> **Task: Use ggsave() to explicitly save a plot to file. Include the exported plot as part of your repository and assignment.**
