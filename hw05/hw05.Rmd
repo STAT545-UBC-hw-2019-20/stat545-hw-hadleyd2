@@ -15,16 +15,15 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.path = "hw05_files/")
 
 ## Keep track of list of tables
-tab.cap = c('Table 1: Summary of number of observations and levels for the original gapminder dataset, the removal of "Oceania" observations, and dropping the "Oceania" factor level',
-            'Table 2: Re-lengthened dataset of life expectancies for Canada and the United States',
-            'Table 3: Life expectancies (years) and GDP per capitas ($US-inflation adjusted) for China and India',
-            'Table 4: Re-lengthed dataset from Table 3',
-            'Table 5: Guest list with e-mails where available',
-            'Table 6: Guests from the guest list with no e-mail available',
-            'Table 7: Names of people with e-mails available that are not on the guest list',
-            'Table 8: Combined tibble of all people either on the guest list or the e-mail list')
+tab.cap = c('Table 1: The factor level orders for continent in the gapminder dataset and continent in the filtered gapminder dataset are the same',
+            'Table 2: The factor level orders for continent in the gapminder dataset, the filtered gapminder dataset, and the drop-level gapminder dataset: filtering does not remove the level while droplevels() does',
+            'Table 3: Summary of number of observations and levels for the original gapminder dataset, the removal of "Oceania" observations, and dropping the "Oceania" factor level',
+            'Table 4: Default ordering of continent factor levels is alphabetical and shown in the left. Factor level ordering changed to descending median regression slope and shown i the right.',
+            'Table 5: Data written to csv',
+            'Table 6: Data imported from csv')
 
-fig.cap = c('Figure 1: Boxplots of the country slope coefficients for GDP per capita versus year')
+fig.cap = c('Figure 1: Boxplots of the country slope coefficients for GDP per capita versus year.  The original factor order is alphabetical and the new factor order sorts descendingly by the median value',
+            'Figure 2: Plotting country population-weighted average life expectancies for the first 10 country factor levels ordered alphabetically and ordered descendingly by highest population-weighted average life expectancy')
 ```
   
 ```{r packages, warning=FALSE, echo=FALSE, message=F}
@@ -93,8 +92,10 @@ noOc <- gapminder %>%
 The number of rows in the `noOc` dataset is `r nrow(noOc)`, as compared to `gapminder` which has `r nrow(gapminder)` rows.  The `continent` column from `gapminder` has `r nlevels(gapminder$continent)` while `noOc` has `r nlevels(noOc$continent)` levels.  The levels of the `continent` factor for both `gapminder` and `noOc` are the same:
 
 ```{r levels1}
-levels(gapminder$continent)
-levels(noOc$continent)
+kable(cbind(levels(gapminder$continent),
+            levels(noOc$continent)),
+      col.names=c("Gapminder Dataset", "Filtered Dataset"),
+      caption=tab.cap[1])
 ```
 
 We know that "Oceania" is a factor level not included in the data of `noOc`.  To remove it, we use the `droplevels()` command to create a new data frame called `noOc.drop` with the "Oceania" level removed.
@@ -102,7 +103,12 @@ We know that "Oceania" is a factor level not included in the data of `noOc`.  To
 noOc.drop <- noOc %>% 
   droplevels()
 
-levels(noOc.drop$continent)
+kable(cbind(levels(gapminder$continent),
+            levels(noOc$continent),
+            c(levels(noOc.drop$continent), "")),
+      col.names=c("Gapminder Dataset", "Filtered Dataset", "Drop-Level Dataset"),
+      caption=tab.cap[2])
+
 ```
 
 Note that dropping levels does not change the number of observations.  The number of rows in `noOc` is `r nrow(noOc)` and the number of rows in `noOc.drop` is `r nrow(noOc.drop)`.
@@ -114,13 +120,13 @@ Dataset | **`gapminder`** | **`noOc`** | **`noOc.drop`** |
 Number of Rows | `r nrow(gapminder)` | `r nrow(noOc)` | `r nrow(noOc.drop)` |
 Number of Levels | `r nlevels(gapminder$continent)` | `r nlevels(noOc$continent)` | `r nlevels(noOc.drop$continent)` |
 Levels | `r paste(levels(gapminder$continent), collapse=', ')` | `r paste(levels(noOc$continent), collapse=', ')` | `r paste(levels(noOc.drop$continent), collapse=', ')` |
-Table: `r tab.cap[1]`
+Table: `r tab.cap[3]`
 
 
 > *2. Reorder the levels of country or continent. Use the forcats package to change the order of the factor levels, based on summarized information of one of the quantitative variables. Consider experimenting with a summary statistic beyond the most basic choice of the mean/median. Use the forcats package in the tidyverse for this, rather than the baseR function as.factor.* 
   
 For each country, we calculate the simple linear regression slope of the natural logarithm of gdpPercap against year.  We then reorder the continent factor descendingly by median country-level regression slope coefficient via the `forcats::fct_reorder()` function.  Note that the `forcats` package is automatically loaded into `R` by loading `tidyverse`.
-```{r max-gdp, fig.cap=fig.cap[1], fig.width=8, fig.height=4}
+```{r max-gdp, fig.cap=fig.cap[1], fig.width=12, fig.height=4}
 # Add column for country regression slope
 gap.growth <- gapminder %>% 
   group_by(country) %>% 
@@ -144,11 +150,14 @@ p2 <- gap.growth %>%
 
 # Compare continent factor orderings for boxplots
 grid.arrange(p1, p2, nrow=1)
+```
 
+```{r compare-levels}
 # Change factor level ordering for gap.growth
-levels(gap.growth$continent)
-gap.growth$continent <- with(gap.growth, fct_reorder(continent, -growth, median))
-levels(gap.growth$continent)
+kable(cbind(levels(gap.growth$continent),
+            levels(with(gap.growth, fct_reorder(continent, -growth, median)))),
+      col.names=c("Alphabetical (Default)", "Descending by Median Slope"),
+      caption=tab.cap[4])
 ```
 
 ---
@@ -158,13 +167,13 @@ levels(gap.growth$continent)
 ---
   
 ## Exercise 3: File input/output (I/O) 
-  **Task: Experiment with at least one of:**
-  
-  - **write_csv()/read_csv() (and/or TSV friends)**,
-  - **saveRDS()/readRDS()**,
-  - **dput()/dget()**.
-  
-  **You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use `here::here()` for reading in and writing out.**
+> **Task: Experiment with at least one of:**
+>  
+>  - **write_csv()/read_csv() (and/or TSV friends)**,
+>  - **saveRDS()/readRDS()**,
+>  - **dput()/dget()**.
+>  
+> **You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use `here::here()` for reading in and writing out.**
   
 Using the gapminder dataset, we calculate the population-weighted moving average life expectancy for each country from `r min(gapminder$year)` to the observation's year.  We then export the country, continent, year, and moving average life expectancy from gapminder to `gap-hw5.csv` using the `readr::write_csv()` function.  The data is imported back into our `R` session via the `readr::read_csv()` function.  The file path is designated by the `here::here()` function.  It should be noted that the `readr` package is automatically loaded with the `tidyverse` package.
 ```{r read-write}
@@ -173,53 +182,92 @@ w.avg <- function(x, w, t) {
   #x is the data to be averaged
   #w is the data by which to weight
   #t is the time column by which we roll the weighted mean
-  weighted.mean(x=x, w=w)
+  ans <- numeric(length(x))
+  for (i in seq_along(t)) {
+    ans[i] <- weighted.mean(x=x[1:i], w=w[1:i])
+  }
+  return(ans)
 }
 #Create new column
-gapminder %>% 
+gap.wavg <- gapminder %>% 
   group_by(country) %>% 
-  summarize(year)
-  # mutate(wavg.lifeExp = weighted.mean(lifeExp[gapminder$year <= year], pop[gapminder$year <= year])) %>% 
-  # filter(year, country, continent, wavg.lifeExp)
+  mutate(wavg.lifeExp = w.avg(x=lifeExp, w=pop, t=year)) %>% 
+  select(country, continent, year, lifeExp, wavg.lifeExp)
   
-# #working directory is project's directory
-# file.name <- here::here("hw05", "hw05_files", "gap-hw5.csv")
-# 
-# #export csv to disc
-# write_csv(gapminder, file.name)
-# gapminder4hw <- read_csv(file.name)
+#working directory is project's directory
+file.name <- here::here("hw05", "hw05_files", "gap-hw5.csv")
+
+#export csv to disc
+write_csv(gap.wavg, file.name)
+
+#re-import csv file
+gap.hw5 <- read_csv(file.name) %>% 
+  mutate(country = factor(country)) %>% 
+  mutate(continent = factor(continent))
 ```
 
   
-  **With the imported data, play around with factor levels and use factors to order your data with one of your factors (i.e. non-alphabetically). For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.**
+> **With the imported data, play around with factor levels and use factors to order your data with one of your factors (i.e. non-alphabetically).**
   
-This time, country was reordered by its minimum pop value, and a new variable country.new was created.
-```{r}
-gapminder4hw$country.new<-with(gapminder, fct_reorder(country, pop, min))
+We reimporting the csv file to the `gap.hw5` tibble, we declared `country` a factor and ordered it alphabetically (the default ordering).  We then reorder the factor levels of `gap.hw5$country` using the `forcats::fct_reorder()` function so that they are ordered descendingly by population-weighted life expectancy for each country as of `r max(gap.hw5$year)`.  Figure 2 shows the factor levels before and after reordering.
+
+```{r country-levels, fig.width=8, fig.height=4, fig.cap=fig.cap[2]}
+k1 <- kable(levels(gap.hw5$country)[1:10], col.names="Factor Levels", caption=tab.cap[2])
+p1 <- gap.hw5 %>% 
+  filter(country %in% levels(country)[1:10]) %>% 
+  group_by(country) %>% 
+  summarize(last.life = last(wavg.lifeExp)) %>% 
+  ggplot(aes(x=country, y=last.life)) +
+  geom_point() +
+  theme(
+    panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
+    axis.text.x = element_text(angle=60)
+  ) + 
+  ylab("2007 Population-Weighted Life Expectancy") +
+  ylim(30, 80) + 
+  xlab("Country") +
+  ggtitle("First 10 Countries Alphabetically")
+
+p2 <- gap.hw5 %>% 
+  mutate(country = fct_reorder(country, -wavg.lifeExp, .fun=last)) %>% 
+  filter(country %in% levels(country)[1:10]) %>% 
+  group_by(country) %>% 
+  summarize(last.life = last(wavg.lifeExp)) %>% 
+  ggplot(aes(x=country, y=last.life)) +
+  geom_point() +
+  theme(
+    panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
+    axis.text.x = element_text(angle=60)
+  ) + 
+  ylab("2007 Population-Weighted Life Expectancy") +
+  ylim(30, 80) + 
+  xlab("Country") +
+  ggtitle("First 10 Countries by Life Expectancy")
+
+grid.arrange(p1, p2, nrow=1)
 ```
 
-  
-To see if country.new has proper factor level, a plot was created below. Note that given 142 countries, the first 50 countries were selected for the plot for readability.  The countries were ordered in the ascending order of their mininum population value.
+> **For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.**
 
+The newly created file survived the round trip of writin to file and being read back into `R` which can be seen by comparing the two datatables in Table 5 and Table 6.
 
-```{r, exercise3}
-gapminder4hw %>% filter(country.new%in%levels(country.new)[1:50]) %>% ggplot(aes(country.new, pop, group=year))+
-  geom_point()+
-  scale_y_log10(labels=scales::comma) +
-  theme(axis.text.x = element_text(angle = 90))
+```{r roundtrip, echo=FALSE}
+#Data written to csv
+gap.wavg %>% 
+  mutate_at(.vars=c("lifeExp", "wavg.lifeExp"), .funs=~round(., digits=2)) %>% 
+  datatable(caption=tab.cap[5])
+
+#Data imported from csv
+gap.hw5 %>% 
+  mutate_at(.vars=c("lifeExp", "wavg.lifeExp"), .funs=~round(., digits=2)) %>% 
+  datatable(caption=tab.cap[6])
 ```
 
-  
-The gapminder was properly exported and imported as back as every entry was the same as shown below.  A newly defined variable after importing back the data (i.e. country.new) had to be excluded for this comparision.
+---
 
-```{r}
-gapminder4hw <- gapminder4hw %>% 
-  select(-country.new)
+<br>
 
-table(gapminder == gapminder4hw)
-```
-
-<br/><br/>
+---
   
 ## Exercise 4: Visualization design
   **Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.**
