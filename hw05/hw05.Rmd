@@ -5,9 +5,9 @@ date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
   html_document:
     css: custom.css
-  keep_md: true
-  toc: true
-  toc_float: true
+    keep_md: true
+    toc: true
+    toc_float: true
 ---   
 
 ```{r setup, include=FALSE}
@@ -23,7 +23,8 @@ tab.cap = c('Table 1: The factor level orders for continent in the gapminder dat
             'Table 6: Data imported from csv')
 
 fig.cap = c('Figure 1: Boxplots of the country slope coefficients for GDP per capita versus year.  The original factor order is alphabetical and the new factor order sorts descendingly by the median value',
-            'Figure 2: Plotting country population-weighted average life expectancies for the first 10 country factor levels ordered alphabetically and ordered descendingly by highest population-weighted average life expectancy')
+            'Figure 2: Plotting country population-weighted average life expectancies for the first 10 country factor levels ordered alphabetically and ordered descendingly by highest population-weighted average life expectancy',
+            'Figure 3: Improving the Boxplot from Class Meeting 008 by changing the theme, editing the labels of both axes, adding a title, and reording the country factor')
 ```
   
 ```{r packages, warning=FALSE, echo=FALSE, message=F}
@@ -221,7 +222,7 @@ p1 <- gap.hw5 %>%
   geom_point() +
   theme(
     panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
-    axis.text.x = element_text(angle=60)
+    axis.text.x = element_text(angle=60, vjust=1, hjust=1)
   ) + 
   ylab("2007 Population-Weighted Life Expectancy") +
   ylim(30, 80) + 
@@ -237,7 +238,7 @@ p2 <- gap.hw5 %>%
   geom_point() +
   theme(
     panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
-    axis.text.x = element_text(angle=60)
+    axis.text.x = element_text(angle=45, vjust=1, hjust=1, size=rel(0.8))
   ) + 
   ylab("2007 Population-Weighted Life Expectancy") +
   ylim(30, 80) + 
@@ -249,7 +250,7 @@ grid.arrange(p1, p2, nrow=1)
 
 > **For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.**
 
-The newly created file survived the round trip of writin to file and being read back into `R` which can be seen by comparing the two datatables in Table 5 and Table 6.
+The newly created file survived the round trip of writing data to file and being read back into `R` which can be seen by comparing the two datatables in Table 5 (data before writing to disc) and Table 6 (data after importing from disc).
 
 ```{r roundtrip, echo=FALSE}
 #Data written to csv
@@ -273,7 +274,51 @@ gap.hw5 %>%
 >**Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.**
   
 >**Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.**
+
+### Class Meeting 008
+
+Exercise 5(a) of the R markdown used for this class, we created a boxplot showing the distribution of life expectancies for each country in the "Americas" continent.  I chose this plot, because I have been wondering why we were given this plot in an Rmarkdown exercise when the plot is clearly insufficient.
+
+Some issues with this plot are
+
+  - The tick labels along the x-axis overlap, making it unreadable,
+  - axis labels are taken directly from the column names of `gapminder` columns being plotted,
+  - no title given to the plot,
+  - default theme is not very appealing,
+  - countries are listed alphabetically using the default factor level order for country.
   
+We tackle each of these issues, respectively, by
+
+  - using `theme(axis.text.x=element_text(angle, vjust, hjust, size))`, we can angle the text of the tick labels so that we do not have to resize too small, adjust the position of the tick labels in the plot, and decrease the size to fit each country name using the `ggplot2::rel()` function,
+  - renaming the axis labels using `xlab()` and `ylab()`,
+  - giving the plot a title with `ggtitle()`,
+  - installing the `ggthemes` package and choosing a more appealing theme from the following [vignette](https://mran.microsoft.com/snapshot/2016-12-03/web/packages/ggthemes/vignettes/ggthemes.html),
+  - changing the factor order of country by `r max(gapminder$year)` population (descending) using the `fct_reorder()` function.
+
+```{r cm008, fig.width=12, fig.height=5, fig.cap=fig.cap[3]}
+suppressPackageStartupMessages(library(ggthemes)) #more appealing ggplot2 themes
+
+p1 <- gapminder %>% 
+  filter(continent == "Americas") %>% 
+  ggplot(aes(country, lifeExp)) + 
+  geom_point() +
+  geom_boxplot()
+
+p2 <- gapminder %>% 
+  filter(continent == "Americas") %>% 
+  ggplot(aes(fct_reorder(country, -pop, last), lifeExp)) + 
+  geom_point() +
+  geom_boxplot() +
+  ggtitle("Country Life Expectancies for the Americas Continent") +
+  xlab(paste("Country - Ordered by Decreasing", max(gapminder$year), "Population")) +
+  ylab("Life Expectancy (in years)") +
+  ggthemes::theme_stata() +
+  ggthemes::scale_color_stata() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   hjust=1, size=rel(0.75)))
+
+grid.arrange(p1, p2, nrow=1)
+```
 ---
 
 <br>
