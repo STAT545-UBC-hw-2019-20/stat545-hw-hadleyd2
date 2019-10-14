@@ -24,7 +24,9 @@ tab.cap = c('Table 1: The factor level orders for continent in the gapminder dat
 
 fig.cap = c('Figure 1: Boxplots of the country slope coefficients for GDP per capita versus year.  The original factor order is alphabetical and the new factor order sorts descendingly by the median value',
             'Figure 2: Plotting country population-weighted average life expectancies for the first 10 country factor levels ordered alphabetically and ordered descendingly by highest population-weighted average life expectancy',
-            'Figure 3: Improving the Boxplot from Class Meeting 008 by changing the theme, editing the labels of both axes, adding a title, and reording the country factor')
+            'Figure 3: Improving the Boxplot from Class Meeting 008 by changing the theme, editing the labels of both axes, adding a title, and reording the country factor',
+            'Figure 4: Function ggsave saves the last created plot by default, the new and improved boxplot from Exercise 4',
+            'Figure 5: By specifying the plot argument of ggsave(), we can save only the plot of interest, which is the original boxplot from Class Meeting 008')
 ```
   
 ```{r packages, warning=FALSE, echo=FALSE, message=F}
@@ -46,7 +48,7 @@ The following section headers come directly from [Assignment 5](https://stat545.
 
 ---
   
-## Exercise 1: Explain the value of the here::here package
+## 1. Value of here::here
   
 > *Read through the [blog post](https://malco.io/2018/11/05/why-should-i-use-the-here-package-when-i-m-already-using-projects/) by Malcolm Barrett where he outlines why one should use the here::here package in RStudio projects.*
 >
@@ -70,7 +72,7 @@ The `here` package takes advantage of the second bullet point by offering a simp
 
 ---
   
-## Exercise 2: Factor management
+## 2. Factor Management
   
 > *Task: Choose one dataset (of your choice) and a variable to explore.*
   
@@ -100,6 +102,7 @@ kable(cbind(levels(gapminder$continent),
 ```
 
 We know that "Oceania" is a factor level not included in the data of `noOc`.  To remove it, we use the `droplevels()` command to create a new data frame called `noOc.drop` with the "Oceania" level removed.
+
 ```{r drop}
 noOc.drop <- noOc %>% 
   droplevels()
@@ -167,14 +170,14 @@ kable(cbind(levels(gap.growth$continent),
 
 ---
   
-## Exercise 3: File input/output (I/O) 
-> **Task: Experiment with at least one of:**
+## 3: File Input/Output
+> *Task: Experiment with at least one of:*
 >  
->  - **write_csv()/read_csv() (and/or TSV friends)**,
->  - **saveRDS()/readRDS()**,
->  - **dput()/dget()**.
+>  - *write_csv()/read_csv() (and/or TSV friends)*,
+>  - *saveRDS()/readRDS()*,
+>  - *dput()/dget()*.
 >  
-> **You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use `here::here()` for reading in and writing out.**
+> *You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use `here::here()` for reading in and writing out.*
   
 Using the gapminder dataset, we calculate the population-weighted moving average life expectancy for each country from `r min(gapminder$year)` to the observation's year.  We then export the country, continent, year, and moving average life expectancy from gapminder to `gap-hw5.csv` using the `readr::write_csv()` function.  The data is imported back into our `R` session via the `readr::read_csv()` function.  The file path is designated by the `here::here()` function.  It should be noted that the `readr` package is automatically loaded with the `tidyverse` package.
 ```{r read-write}
@@ -208,7 +211,7 @@ gap.hw5 <- read_csv(file.name) %>%
 ```
 
   
-> **With the imported data, play around with factor levels and use factors to order your data with one of your factors (i.e. non-alphabetically).**
+> *With the imported data, play around with factor levels and use factors to order your data with one of your factors (i.e. non-alphabetically).*
   
 We reimporting the csv file to the `gap.hw5` tibble, we declared `country` a factor and ordered it alphabetically (the default ordering).  We then reorder the factor levels of `gap.hw5$country` using the `forcats::fct_reorder()` function so that they are ordered descendingly by population-weighted life expectancy for each country as of `r max(gap.hw5$year)`.  Figure 2 shows the factor levels before and after reordering.
 
@@ -248,7 +251,7 @@ p2 <- gap.hw5 %>%
 grid.arrange(p1, p2, nrow=1)
 ```
 
-> **For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.**
+> *For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.*
 
 The newly created file survived the round trip of writing data to file and being read back into `R` which can be seen by comparing the two datatables in Table 5 (data before writing to disc) and Table 6 (data after importing from disc).
 
@@ -270,10 +273,10 @@ gap.hw5 %>%
 
 ---
   
-## Exercise 4: Visualization design
->**Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.**
+## 4. Visualization Design
+> *Go back through your previous assignments and class participation activities and find figures you created prior to the last week of the course. Recreate at least one figure in light of something you learned in the recent class meetings about visualization design and color.*
   
->**Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.**
+> *Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.*
 
 ### Class Meeting 008
 
@@ -298,12 +301,14 @@ We tackle each of these issues, respectively, by
 ```{r cm008, fig.width=12, fig.height=5, fig.cap=fig.cap[3]}
 suppressPackageStartupMessages(library(ggthemes)) #more appealing ggplot2 themes
 
+## Original plot made in Class Meeting 008 Exercise 5(a)
 p1 <- gapminder %>% 
   filter(continent == "Americas") %>% 
   ggplot(aes(country, lifeExp)) + 
   geom_point() +
   geom_boxplot()
 
+## Improved plot using tools learned in past week
 p2 <- gapminder %>% 
   filter(continent == "Americas") %>% 
   ggplot(aes(fct_reorder(country, -pop, last), lifeExp)) + 
@@ -317,14 +322,46 @@ p2 <- gapminder %>%
   theme(axis.text.x = element_text(angle = 45, vjust = 1,
                                    hjust=1, size=rel(0.75)))
 
-grid.arrange(p1, p2, nrow=1)
+## Display plots side-by-side
+p3 <- grid.arrange(p1, p2, nrow=1)
+
+p3
 ```
+
 ---
 
 <br>
 
 ---
   
-## Exercise 5: Writing figures to file
+## 5. Writing Figures to File
   
-> **Task: Use ggsave() to explicitly save a plot to file. Include the exported plot as part of your repository and assignment.**
+> *Task: Use `ggsave()` to explicitly save a plot to file*. *Include the exported plot as part of your repository and assignment*.
+>
+> *Then, use `![Alt text](/path/to/img.png)` to load and embed that file into your report*. *You can play around with various options, such as*:
+>
+> - *Arguments of `ggsave()`*, *such as width*, *height*, *resolution or text scaling*.
+> - *Various graphics devices*, *e.g. a vector vs*. *raster format*.
+> - *Explicit provision of the plot object `p` via `ggsave(..., plot = p)`*. *Show a situation in which this actually matters*.
+
+For this exercise, we want to save the original plot from the class meeting 008 worksheet used in Exercise 4.  If we try the command `ggsave(improved.plot)` without specifying the `plot=` argument, the default behavior of `ggplot()` saves the new and improved plot only.
+
+```{r default, fig.width=12, fig.height=5}
+file.name <- here::here("hw05", "hw05_files", "default-plot.png")
+ggsave(filename=file.name)
+```
+
+Note that the file was saved with the dimensions `fig.width=12, fig.height=5` that I had set in the previous code chunk.  The result of the default behavior shows the new and improved boxplot only in Figure 4.
+
+![`r fig.cap[4]`](`r file.name`)
+
+By specifying `plot=p1` inside of the `ggsave()` function, we specify that we want to save the original boxplot from Exericse 4.
+
+```{r saveplot, fig.width=12, fig.height=5}
+file.name <- here::here("hw05", "hw05_files", "ex5-plot.png")
+ggsave(filename=file.name, plot=p1)
+```
+
+The saved plot is given in Figure 5 and shows the desired result.
+
+![`r fig.cap[5]`](`r file.name`) 
