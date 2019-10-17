@@ -15,24 +15,23 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.path = "hw05_files/")
 
 ## Keep track of list of tables
-tab.cap = c('Table 1: The factor level orders for continent in the gapminder dataset and continent in the filtered gapminder dataset are the same',
-            'Table 2: The factor level orders for continent in the gapminder dataset, the filtered gapminder dataset, and the drop-level gapminder dataset: filtering does not remove the level while droplevels() does',
+tab.cap = c('Table 1: The factor levels and their orders for continent are the same in the gapminder dataset and the filtered noOc dataset',
+            'Table 2: The factor level orders for continent in the gapminder dataset, the filtered noOc dataset, and the drop-level noOc.drop dataset: filtering does not remove unused levels while droplevels() does',
             'Table 3: Summary of number of observations and levels for the original gapminder dataset, the removal of "Oceania" observations, and dropping the "Oceania" factor level',
-            'Table 4: Default ordering of continent factor levels is alphabetical and shown in the left. Factor level ordering changed to descending median regression slope and shown i the right.',
+            'Table 4: Default ordering of the continent factor levels is alphabetical and presented in the first column. The new factor level order is descending median regression slope and is presented in the second column.',
             'Table 5: Data written to csv',
             'Table 6: Data imported from csv')
 
-fig.cap = c('Figure 1: Boxplots of the country slope coefficients for GDP per capita versus year.  The original factor order is alphabetical and the new factor order sorts descendingly by the median value',
-            'Figure 2: Plotting country population-weighted average life expectancies for the first 10 country factor levels ordered alphabetically and ordered descendingly by highest population-weighted average life expectancy',
-            'Figure 3: Improving the Boxplot from Class Meeting 008 by changing the theme, editing the labels of both axes, adding a title, and reording the country factor',
+fig.cap = c('Figure 1: Boxplots of the country slope coefficients for GDP per capita versus year.  The original factor order is alphabetical (left) and the new factor order sorts descendingly by the median value (right)',
+            'Figure 2: Plotting country population-weighted moving average life expectancy for 2007 with countries ordered alphabetically (left plot) and ordered descendingly by 2007 population-weighted moving average life expectancy',
+            'Figure 3: The original boxplot from Class Meeting 008 is given on the left. By changing the theme, editing the labels, adding a title, and reording the country factor, we can improve the readability for the plot on the right',
             'Figure 4: Function ggsave saves the last created plot by default, the new and improved boxplot from Exercise 4',
-            'Figure 5: By specifying the plot argument of ggsave(), we can save only the plot of interest, which is the original boxplot from Class Meeting 008')
+            'Figure 5: By specifying the plot argument of ggsave(), we can save a specific plot of interest, which is the original boxplot from Class Meeting 008')
 ```
   
 ```{r packages, warning=FALSE, echo=FALSE, message=F}
 suppressPackageStartupMessages(library(tidyverse)) #loads ggplot2, tibble, tidyr, dplyr packages
 suppressPackageStartupMessages(library(gapminder)) #for gapminder dataset
-suppressPackageStartupMessages(library(datasets))
 suppressPackageStartupMessages(library(DT)) #for datatable() to display datatables
 suppressPackageStartupMessages(library(knitr)) #for kable()
 suppressPackageStartupMessages(library(gridExtra)) #arrange figures side-by-side
@@ -40,7 +39,15 @@ suppressPackageStartupMessages(library(gridExtra)) #arrange figures side-by-side
 
 ## Introduction
 
-The following section headers come directly from [Assignment 5](https://stat545.stat.ubc.ca/evaluation/hw05/hw05/).  Instructions for each section are given in italics directly below the header as blockquotes.  Note that I have overriden the default size of blockquotes via my `custom.css` file.  Instructions for doing this are taken from [here](https://stackoverflow.com/questions/44191576/how-to-control-the-font-size-of-quoted-text-in-markdown).
+This is my submission for STAT 545A [Assignment 5](https://stat545.stat.ubc.ca/evaluation/hw05/hw05/).  Each of the 5 sections represents a different question from the assignment.  For anyone not familiar with this assignment, instructions for each questions are given as blockquote within the respective section.  To make the assignment more readable, instructions are sometimes broken up into parts with my solution given directly below the respective part.  Note that I have overriden the default size of blockquotes via the `custom.css` file, and I found instructions for doing this [here](https://stackoverflow.com/questions/44191576/how-to-control-the-font-size-of-quoted-text-in-markdown).
+
+The following libraries are loaded into the `R` markdown file used to create this assignment:
+
+  - tidyverse
+  - gapminder
+  - DT
+  - knitr
+  - gridExtra
 
 ---
 
@@ -54,11 +61,11 @@ The following section headers come directly from [Assignment 5](https://stat545.
 >
 > *Task: * ***In your own words****, summarize the value of the here::here package in 250 words or fewer.*
 
-To explain the usefulness of the `here` package, we first must introduce the idea of `R` projects.  Benefits of using `R` projects are:
+To explain the usefulness of the `here` package, we first must introduce the idea of `R` projects.  Benefits of using `R` projects are to
 
-  - Divide work into specific projects
-  - Uses the project's directory as the working directory
-  - Can be set to open a fresh `R` session with an empty global environment and no packages loaded
+  - divide work into specific projects,
+  - use each project's directory as the working directory by default, and
+  - manage the settings of a project to open a fresh `R` session with an empty global environment and no packages loaded.
 
 The `here` package takes advantage of the second bullet point by offering a simple set of functions that detects the project's root directory and works with paths within that directory in a platform-independent way so that the `R` code is not affected by the user's operating system.  Additionally, `here`
 
@@ -83,8 +90,6 @@ class(gapminder$continent)
 ```
   
 > *1. Drop Oceania. Filter the Gapminder data to remove observations associated with the `continent` of Oceania. Additionally, remove unused factor levels. Provide concrete information on the data before and after removing these rows and Oceania; address the number of rows and the levels of the affected factors.*
-
-Table 1 below contains the summarized results.
   
 Removing observations associated with values in a column is easily done via the `dplyr::filter()` command.  We create a new tibble called `noOc` which filters all observations with `continent=="Oceania"` from gapminder.
 ```{r}
@@ -92,16 +97,16 @@ noOc <- gapminder %>%
   filter(continent != 'Oceania')
 ```
 
-The number of rows in the `noOc` dataset is `r nrow(noOc)`, as compared to `gapminder` which has `r nrow(gapminder)` rows.  The `continent` column from `gapminder` has `r nlevels(gapminder$continent)` while `noOc` has `r nlevels(noOc$continent)` levels.  The levels of the `continent` factor for both `gapminder` and `noOc` are the same:
+The number of rows in the `noOc` dataset is `r nrow(noOc)`, as compared to `gapminder` which has `r nrow(gapminder)` rows.  Filtering does not change the levels of a factor or the order of the levels.  The `continent` column from `gapminder` has `r nlevels(gapminder$continent)` levels and `noOc` has `r nlevels(noOc$continent)` levels.
 
 ```{r levels1}
 kable(cbind(levels(gapminder$continent),
             levels(noOc$continent)),
-      col.names=c("Gapminder Dataset", "Filtered Dataset"),
+      col.names=c("Gapminder Dataset", "Filtered noOc Dataset"),
       caption=tab.cap[1])
 ```
 
-We know that "Oceania" is a factor level not included in the data of `noOc`.  To remove it, we use the `droplevels()` command to create a new data frame called `noOc.drop` with the "Oceania" level removed.
+"Oceania" is a factor level not included in the `noOc` dataset.  To remove it, we use the `droplevels()` function and create a new `noOc.drop` dataset.
 
 ```{r drop}
 noOc.drop <- noOc %>% 
@@ -110,12 +115,12 @@ noOc.drop <- noOc %>%
 kable(cbind(levels(gapminder$continent),
             levels(noOc$continent),
             c(levels(noOc.drop$continent), "")),
-      col.names=c("Gapminder Dataset", "Filtered Dataset", "Drop-Level Dataset"),
+      col.names=c("Gapminder Dataset", "Filtered noOc Dataset", "Drop-Level noOc.drop Dataset"),
       caption=tab.cap[2])
 
 ```
 
-Note that dropping levels does not change the number of observations.  The number of rows in `noOc` is `r nrow(noOc)` and the number of rows in `noOc.drop` is `r nrow(noOc.drop)`.
+Dropping levels does not affect the number of observations, since it only drops unused factors.  The number of rows in `noOc` is `r nrow(noOc)` and the number of rows in `noOc.drop` is `r nrow(noOc.drop)`.
 
 In summary, 
 
@@ -129,7 +134,8 @@ Table: `r tab.cap[3]`
 
 > *2. Reorder the levels of country or continent. Use the forcats package to change the order of the factor levels, based on summarized information of one of the quantitative variables. Consider experimenting with a summary statistic beyond the most basic choice of the mean/median. Use the forcats package in the tidyverse for this, rather than the baseR function as.factor.* 
   
-For each country, we calculate the simple linear regression slope of the natural logarithm of gdpPercap against year.  We then reorder the continent factor descendingly by median country-level regression slope coefficient via the `forcats::fct_reorder()` function.  Note that the `forcats` package is automatically loaded into `R` by loading `tidyverse`.
+For each country, we calculate the simple linear regression slope of the natural logarithm of gdpPercap against year.  Using the `forcats::fct_reorder()` function, we reorder the continent factor descendingly by its median country-level regression slope coefficient.  Note that the `forcats` package is automatically loaded into `R` when loading `tidyverse`.
+
 ```{r max-gdp, fig.cap=fig.cap[1], fig.width=12, fig.height=4}
 # Add column for country regression slope
 gap.growth <- gapminder %>% 
@@ -142,7 +148,8 @@ p1 <- gap.growth %>%
   geom_boxplot() + 
   xlab("Continent") +
   ylab("Slope") +
-  ggtitle(label="Original Factor Order (alphabetical)")
+  ggtitle(label="Original Factor Order (alphabetical)") +
+  theme_bw()
 
 # Order by largest slope
 p2 <- gap.growth %>% 
@@ -150,7 +157,8 @@ p2 <- gap.growth %>%
   geom_boxplot() + 
   xlab("Continent") +
   ylab("Slope") +
-  ggtitle(label="New Factor Order (median)")
+  ggtitle(label="New Factor Order (descending median)") +
+  theme_bw()
 
 # Compare continent factor orderings for boxplots
 grid.arrange(p1, p2, nrow=1)
@@ -179,7 +187,8 @@ kable(cbind(levels(gap.growth$continent),
 >  
 > *You are expected to create something new, probably by filtering or grouped-summarization of your dataset (for e.g., Singer, Gapminder, or another dataset), export it to disk and then reload it back in using one of the packages above. You should use `here::here()` for reading in and writing out.*
   
-Using the gapminder dataset, we calculate the population-weighted moving average life expectancy for each country from `r min(gapminder$year)` to the observation's year.  We then export the country, continent, year, and moving average life expectancy from gapminder to `gap-hw5.csv` using the `readr::write_csv()` function.  The data is imported back into our `R` session via the `readr::read_csv()` function.  The file path is designated by the `here::here()` function.  It should be noted that the `readr` package is automatically loaded with the `tidyverse` package.
+Using the gapminder dataset, we calculate the population-weighted moving average life expectancy for each country from `r min(gapminder$year)` to each year and filter our dataset to the countries Canada, United States, and Brazil.  We then export the country, continent, year, and moving average life expectancy from gapminder to `gap-hw5.csv` using the `readr::write_csv()` function.  The data is imported back into `R` using the `readr::read_csv()` function.  The file path is designated by the `here::here()` function. The `readr` package is automatically loaded when `tidyverse` is loaded.
+
 ```{r read-write}
 # Population-weighted moving average function
 w.avg <- function(x, w, t) {
@@ -194,6 +203,9 @@ w.avg <- function(x, w, t) {
 }
 #Create new column
 gap.wavg <- gapminder %>% 
+  filter(country == "Canada" |
+           country == "United States" |
+           country == "Brazil") %>% 
   group_by(country) %>% 
   mutate(wavg.lifeExp = w.avg(x=lifeExp, w=pop, t=year)) %>% 
   select(country, continent, year, lifeExp, wavg.lifeExp)
@@ -216,21 +228,19 @@ gap.hw5 <- read_csv(file.name) %>%
 We reimporting the csv file to the `gap.hw5` tibble, we declared `country` a factor and ordered it alphabetically (the default ordering).  We then reorder the factor levels of `gap.hw5$country` using the `forcats::fct_reorder()` function so that they are ordered descendingly by population-weighted life expectancy for each country as of `r max(gap.hw5$year)`.  Figure 2 shows the factor levels before and after reordering.
 
 ```{r country-levels, fig.width=8, fig.height=4, fig.cap=fig.cap[2]}
-k1 <- kable(levels(gap.hw5$country)[1:10], col.names="Factor Levels", caption=tab.cap[2])
 p1 <- gap.hw5 %>% 
   filter(country %in% levels(country)[1:10]) %>% 
   group_by(country) %>% 
   summarize(last.life = last(wavg.lifeExp)) %>% 
   ggplot(aes(x=country, y=last.life)) +
   geom_point() +
-  theme(
-    panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
-    axis.text.x = element_text(angle=60, vjust=1, hjust=1)
-  ) + 
-  ylab("2007 Population-Weighted Life Expectancy") +
+  theme_bw() + 
+  theme(panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
+        axis.text.x = element_text(angle=60, vjust=1, hjust=1)) + 
+  ylab("Life Expectancy") +
   ylim(30, 80) + 
-  xlab("Country") +
-  ggtitle("First 10 Countries Alphabetically")
+  xlab("Country (alphabetical)") +
+  ggtitle("2007 Population-Weighted Life Expectancy")
 
 p2 <- gap.hw5 %>% 
   mutate(country = fct_reorder(country, -wavg.lifeExp, .fun=last)) %>% 
@@ -239,30 +249,39 @@ p2 <- gap.hw5 %>%
   summarize(last.life = last(wavg.lifeExp)) %>% 
   ggplot(aes(x=country, y=last.life)) +
   geom_point() +
-  theme(
-    panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
-    axis.text.x = element_text(angle=45, vjust=1, hjust=1, size=rel(0.8))
-  ) + 
-  ylab("2007 Population-Weighted Life Expectancy") +
+  theme_bw() + 
+  theme(panel.grid.major.x = element_line(colour="grey60", linetype="dashed"),
+        axis.text.x = element_text(angle=45, vjust=1, hjust=1, size=rel(0.8))) + 
+  ylab("Life Expectancy") +
   ylim(30, 80) + 
-  xlab("Country") +
-  ggtitle("First 10 Countries by Life Expectancy")
+  xlab("Country (descending life expectancy)") +
+  ggtitle("2007 Population-Weighted Life Expectancy")
 
 grid.arrange(p1, p2, nrow=1)
 ```
 
 > *For the I/O method(s) you chose, comment on whether or not your newly created file survived the round trip of writing to file then reading back in.*
 
-The newly created file survived the round trip of writing data to file and being read back into `R` which can be seen by comparing the two datatables in Table 5 (data before writing to disc) and Table 6 (data after importing from disc).
+The newly created file survived the round trip of writing data to file and being read back into `R` which can be seen by comparing the datasets `gap.wavg`, which is presented in Table 5 and written to disc, and the `gap.hw5` dataset presented in Table 6 after importing the data from a `*.csv` file.  It should be noted that the reimported data does not preserve the factor data type for country and continent and imports them as character strings.  Thus after importing, I use `mutate(country = factor(country))` and `mutate(country = factor(country))` to declare these columns as factors.
 
-```{r roundtrip, echo=FALSE}
+```{r roundtrip}
 #Data written to csv
 gap.wavg %>% 
   mutate_at(.vars=c("lifeExp", "wavg.lifeExp"), .funs=~round(., digits=2)) %>% 
   datatable(caption=tab.cap[5])
 
-#Data imported from csv
+# Create file name and directory for output
+file.name <- here::here("hw05", "hw05_files", "gap-hw5.csv")
+
+# Export data as csv
+write_csv(gap.wavg, file.name)
+
+# Data imported from csv
+gap.hw5 <- read_csv(file.name)
+
 gap.hw5 %>% 
+  mutate(country = factor(country)) %>% 
+  mutate(continent = factor(continent)) %>% 
   mutate_at(.vars=c("lifeExp", "wavg.lifeExp"), .funs=~round(., digits=2)) %>% 
   datatable(caption=tab.cap[6])
 ```
@@ -278,11 +297,7 @@ gap.hw5 %>%
   
 > *Task: Create a side-by-side plot and juxtapose your first attempt (show the original figure as-is) with a revised attempt after some time spent working on it and implementing principles of effective plotting principles. Comment and reflect on the differences.*
 
-### Class Meeting 008
-
-Exercise 5(a) of the R markdown used for this class, we created a boxplot showing the distribution of life expectancies for each country in the "Americas" continent.  I chose this plot, because I have been wondering why we were given this plot in an Rmarkdown exercise when the plot is clearly insufficient.
-
-Some issues with this plot are
+In the R markdown [worksheet](https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/tutorials/cm008-exercise.Rmd) for class meeting 008, exercise 5(a) creates a boxplot for the distributions of life expectancies for countries in the "Americas" continent.  I chose this plot, because I have been wondering why this plot was included in the worksheet when it has obvious deficiencies which can be seen in the left-hand plot of Figure 3 and listed below:
 
   - The tick labels along the x-axis overlap, making it unreadable,
   - axis labels are taken directly from the column names of `gapminder` columns being plotted,
@@ -292,7 +307,7 @@ Some issues with this plot are
   
 We tackle each of these issues, respectively, by
 
-  - using `theme(axis.text.x=element_text(angle, vjust, hjust, size))`, we can angle the text of the tick labels so that we do not have to resize too small, adjust the position of the tick labels in the plot, and decrease the size to fit each country name using the `ggplot2::rel()` function,
+  - using `theme(axis.text.x=element_text(angle, vjust, hjust, size))`, we angle the x-axis tick labels, adjust the position of the tick labels, and decrease the font size with the `ggplot2::rel()` function,
   - renaming the axis labels using `xlab()` and `ylab()`,
   - giving the plot a title with `ggtitle()`,
   - installing the `ggthemes` package and choosing a more appealing theme from the following [vignette](https://mran.microsoft.com/snapshot/2016-12-03/web/packages/ggthemes/vignettes/ggthemes.html),
@@ -314,7 +329,7 @@ p2 <- gapminder %>%
   ggplot(aes(fct_reorder(country, -pop, last), lifeExp)) + 
   geom_point() +
   geom_boxplot() +
-  ggtitle("Country Life Expectancies for the Americas Continent") +
+  ggtitle("Life Expectancies for the Americas Continent") +
   xlab(paste("Country - Ordered by Decreasing", max(gapminder$year), "Population")) +
   ylab("Life Expectancy (in years)") +
   ggthemes::theme_stata() +
@@ -323,9 +338,7 @@ p2 <- gapminder %>%
                                    hjust=1, size=rel(0.75)))
 
 ## Display plots side-by-side
-p3 <- grid.arrange(p1, p2, nrow=1)
-
-p3
+grid.arrange(p1, p2, nrow=1)
 ```
 
 ---
@@ -344,14 +357,14 @@ p3
 > - *Various graphics devices*, *e.g. a vector vs*. *raster format*.
 > - *Explicit provision of the plot object `p` via `ggsave(..., plot = p)`*. *Show a situation in which this actually matters*.
 
-For this exercise, we want to save the original plot from the class meeting 008 worksheet used in Exercise 4.  If we try the command `ggsave(improved.plot)` without specifying the `plot=` argument, the default behavior of `ggplot()` saves the new and improved plot only.
+For this exercise, we want to save the original plot from the class meeting 008 worksheet used in Exercise 4.  If we try the command `ggsave()` without specifying the `plot=` argument, the last plot is saved, which is not the plot we want.
 
 ```{r default, fig.width=12, fig.height=5}
 file.name <- here::here("hw05", "hw05_files", "default-plot.png")
 ggsave(filename=file.name)
 ```
 
-Note that the file was saved with the dimensions `fig.width=12, fig.height=5` that I had set in the previous code chunk.  The result of the default behavior shows the new and improved boxplot only in Figure 4.
+Note that the file was saved with the dimensions `fig.width=12, fig.height=5` which are set in the `R` code chunk options.  The image is rendered with the code `![caption](file.name)`.
 
 ![`r fig.cap[4]`](`r file.name`)
 
