@@ -48,6 +48,7 @@ The following libraries are loaded into the `R` markdown file used to create thi
   - DT
   - knitr
   - gridExtra
+  - ggthemes
 
 ---
 
